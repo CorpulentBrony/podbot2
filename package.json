@@ -1,0 +1,44 @@
+{
+  "files": "/var/www/podbot/",
+  "name": "podbot",
+  "version": "2.0.0",
+  "description": "Just another Discord bot, not very customizable.  Now written in pure JavaScript cuz fuck the police.",
+  "keywords": [
+    "discord",
+    "discord bot",
+    "discord bot framework",
+    "typescript",
+    "pony"
+  ],
+  "homepage": "https://iwtcits.com",
+  "bugs": {
+    "url": "https://github.com/CorpulentBrony/podbot2/issues",
+    "email": "corpulent@brony.email"
+  },
+  "main": "index.mjs",
+  "scripts": {
+    "_start": "NODE_ENV=production pm2 start index.mjs --name=\"podbot2\"",
+    "start": "node --experimental-modules index.mjs",
+    "stop": "pm2 stop \"podbot2\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Corpulent Brony",
+    "email": "corpulent@brony.email",
+    "url": "https://youtube.com/c/CorpulentBrony"
+  },
+  "license": "https://donutsteel.pl",
+  "engines": {
+    "node": ">=7.7.2"
+  },
+  "private": true,
+  "dependencies": {
+    "bufferutil": "^3.0.5",
+    "discord.js": "^11.4.2",
+    "erlpack": "github:discordapp/erlpack",
+    "libsodium-wrappers": "^0.7.3",
+    "node-opus": "^0.2.9",
+    "sodium": "^2.0.3",
+    "zlib-sync": "^0.1.4"
+  }
+}
