@@ -106,3 +106,7 @@ HttpRequest.urlToOptions = function(url) {
 		options.auth = `${url.username}:${url.password}`;
 	return options;
 };
+HttpRequest.prototype.agent = undefined;
+HttpRequest.prototype.headers = undefined;
+HttpRequest.prototype.url = undefined;
+HttpRequest.prototype.useKeepAlive = true;

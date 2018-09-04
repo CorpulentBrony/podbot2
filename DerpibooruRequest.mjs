@@ -6,10 +6,27 @@ const FAVICON_URL = "https://derpicdn.net/img/2017/6/14/1461521/thumb.png";
 const FILTERS = { safe: 100073, nsfw: 56027 };
 const SEARCH_PATH = "/search.json";
 
-export class DerpibooruRequest extends HttpRequest {
-	constructor() {
-		super(new URL(SEARCH_PATH, BASE_URL));
+class ApiRequest extends HttpRequest {
+	getBidirectionalIterator(request, current) {
+		const next = function() {
+			this.index = ++this.index % request.results.length;
+			return this.current();
+		};
+		const prev = function() {
+			if (--this.index < 0)
+				this.index += request.results.length;
+			return this.current();
+		};
+		const result = { index: 0, next, prev };
+		result.current = current.bind(result);
+		return result;
 	}
+}
+ApiRequest.prototype.length = 0;
+ApiRequest.prototype.results = [];
+
+export class DerpibooruRequest extends ApiRequest {
+	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
 	async query(queryString, isNsfw = false) {
 		const query = {
 			filter_id: isNsfw ? FILTERS.nsfw : FILTERS.safe,
@@ -39,6 +56,7 @@ export class DerpibooruRequest extends HttpRequest {
 		this.results = images;
 		return this.getBidirectionalIterator();
 	}
+	// how to get this to work with ApiRequest class above?
 	getBidirectionalIterator() {
 		let index = 0;
 		const current = () => {
