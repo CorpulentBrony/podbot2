@@ -1,10 +1,11 @@
 import * as Constants from "./Constants";
+import Discord from "./node_modules/discord.js/src/index.js";
 import util from "./util";
 
 const DEFAULT_EMBED_COLOR = 0x673888;
-const DEFAULT_REACTS = { del: Constants.Reacts.DEL, next: Constants.Reacts.NEXT, prev: Constants.Reacts.PREV, stop: Constants.Reacts.STOP };
+const DEFAULT_REACTS = { del: Constants.Reacts.DEL, first: Constants.Reacts.FIRST, last: Constants.Reacts.LAST, next: Constants.Reacts.NEXT, prev: Constants.Reacts.PREV, stop: Constants.Reacts.STOP };
 const DEFAULT_REACTS_COLLECT_OPTIONS = { time: 300000 };
-const DEFAULT_REACTS_DISPLAY_ORDER = ["prev", "next", "stop", "del"];
+const DEFAULT_REACTS_DISPLAY_ORDER = ["first", "prev", "next", "last", "stop", "del"];
 
 export class MessageEmbed {
 	constructor(options) {
@@ -18,15 +19,15 @@ export class MessageEmbed {
 		return message.edit(undefined, { embed: this.embed.assign(options) });
 	}
 	async removeReactions(reactsToDelete) {
+		const canRemoveReacts = this.message.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES);
+
 		for (const [snowflake, reaction] of this.message.reactions)
 			if (reactsToDelete.includes(reaction.emoji.name))
-				for (const [snowflake, user] of await reaction.fetchUsers())
-					reaction.remove(user).catch((err) => {
-						if (err.message !== "Missing Permissions")
-							console.error(err);
-						else
-							throw err;
-					});
+				if (canRemoveReacts)
+					for (const [snowflake, user] of await reaction.fetchUsers())
+						reaction.remove(user).catch(console.error);
+				else
+					reaction.remove(this.message.member).catch(console.error);
 	}
 	async send(channel = this.channel, author = this.embed.author, reacts) {
 		author = (typeof author === "object") ? { author: { icon_url: util.toString(author.avatarURL), name: util.toString(author.username) } } : {};
@@ -35,6 +36,7 @@ export class MessageEmbed {
 
 		if (reacts.default || reacts.values.length > 0) {
 			const reactsToSend = (reacts.default ? this.constructor.DEFAULT_REACTS : reacts.values);
+			console.log(reactsToSend);
 			this.message = await this.message;
 
 			for (const react of reactsToSend)

@@ -1,6 +1,7 @@
 import * as Constants from "./Constants";
 import { DerpibooruRequest } from "./DerpibooruRequest";
 import Discord from "./node_modules/discord.js/src/index.js";
+import { FourChanRequest } from "./FourChanRequest";
 import { HttpRequest } from "./HttpRequest";
 import { MessageEmbed } from "./MessageEmbed";
 import * as Path from "path";
@@ -61,19 +62,40 @@ Bot.messages = {
 Bot.prototype.client = undefined;
 Bot.prototype.commands = {
 	async ["4chan"]({ author, channel }, args) {
-
+		try {
+			const request = new FourChanRequest();
+			const resultIterator = await request.query(args);
+			const embed = new MessageEmbed(resultIterator.current().value);
+			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
+			const reactionCollector = await embed.send(channel, author, reacts);
+			reactionCollector.on("collect", (reaction) => {
+				switch (reaction.emoji.name) {
+					case Constants.Reacts.FIRST: return embed.edit(resultIterator.first().value);
+					case Constants.Reacts.LAST: return embed.edit(resultIterator.last().value);
+					case Constants.Reacts.PREV: return embed.edit(resultIterator.prev().value);
+					case Constants.Reacts.NEXT: return embed.edit(resultIterator.next().value);
+				}
+			});
+		} catch (err) {
+			if (err instanceof HttpRequest.Error)
+				err.sendEmbed(channel, author);
+			else
+				throw err;
+		}
 	},
 	async db({ author, channel }, args) {
 		if (!args)
 			return;
 		try {
-			const db = new DerpibooruRequest();
-			const resultIterator = await db.query(args, channel.nsfw);
+			const request = new DerpibooruRequest();
+			const resultIterator = await request.query(args, channel.nsfw);
 			const embed = new MessageEmbed(resultIterator.current().value);
-			const reacts = { collect: true, default: db.length > 1, values: [Constants.Reacts.DEL] };
+			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
 			const reactionCollector = await embed.send(channel, author, reacts);
 			reactionCollector.on("collect", (reaction) => {
 				switch (reaction.emoji.name) {
+					case Constants.Reacts.FIRST: return embed.edit(resultIterator.first().value);
+					case Constants.Reacts.LAST: return embed.edit(resultIterator.last().value);
 					case Constants.Reacts.PREV: return embed.edit(resultIterator.prev().value);
 					case Constants.Reacts.NEXT: return embed.edit(resultIterator.next().value);
 				}
@@ -91,3 +113,4 @@ Bot.prototype.commands = {
 		return embed.send(channel, author).catch(console.error);
 	}
 };
+// console.log(Discord.Constants);

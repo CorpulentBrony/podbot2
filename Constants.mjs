@@ -1,2 +1,2 @@
-export const Reacts = { DEL: "🗑", NEXT: "⏩", PREV: "⏪", STOP: "⏹" };
-export const Emotes = Object.assign({ COMMENT: "💬", DOWN: "⬇", ERROR: "⚠", PING: "🏓", STAR: "⭐", UP: "⬆" }, Reacts);
+export const Reacts = { DEL: "🗑", FIRST: "%E2%8F%AE" /* ⏮ */, LAST: "%E2%8F%AD" /* ⏭ */, NEXT: "⏩", PREV: "⏪", STOP: "⏹" };
+export const Emotes = Object.assign({ COMMENT: "💬", DOWN: "⬇", ERROR: "⚠", IMAGE: "🖼", PING: "🏓", STAR: "⭐", UP: "⬆" }, Reacts);

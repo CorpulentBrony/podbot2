@@ -25,7 +25,7 @@ export class HttpRequest {
 		[this.headers, this.url, this.useKeepAlive] = [headers, (typeof url === "string") ? new URL(url) : url, useKeepAlive];
 		this.agent = new Https.Agent({ keepAlive: this.useKeepAlive });
 	}
-	async query(method, query = undefined) {
+	async query(method = "GET", query = undefined) {
 		if (!this.headers)
 			this.headers = await this.constructor.headers.getDefault();
 		const headers = this.useKeepAlive ? Object.assign({}, this.headers, this.constructor.headers.keepAlive) : this.headers;
@@ -39,13 +39,16 @@ export class HttpRequest {
 			Https.request(options, (response) => {
 				let error;
 
+				if (response.statusCode === 404)
+					error = new this.constructor.Error(`No results found for ${query}.  (404)`);
+
 				if (response.statusCode === 304)
 					resolve.call(this, undefined);
 
 				if (response.statusCode !== 200)
-					error = new Error(`HTTPS request failed.  Status code: ${response.statusCode.toString()}`);
+					error = new this.constructor.Error(`HTTPS request failed.  Status code: ${response.statusCode.toString()}`);
 				else if (!/^application\/json/.test(response.headers["content-type"]))
-					error = new Error(`Invalid content-type for HTTPS request.  Expected application/json but received ${response.headers["content-type"]}`);
+					error = new this.constructor.Error(`Invalid content-type for HTTPS request.  Expected application/json but received ${response.headers["content-type"]}`);
 
 				if (error) {
 					reject(error);

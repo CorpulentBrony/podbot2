@@ -1,3 +1,11 @@
+export function arrayShuffle(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.random() * (i + 1) >>> 0;
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+	return array;
+}
+
 export function formatTimestamp(number) {
 	const timestamp = new Date(number);
 	const duration = [timestamp.getUTCDate() - 1, timestamp.getUTCHours(), timestamp.getUTCMinutes(), timestamp.getUTCSeconds() + timestamp.getUTCMilliseconds() / 1000];
