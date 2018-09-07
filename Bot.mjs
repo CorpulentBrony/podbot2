@@ -1,14 +1,16 @@
+import { BotError } from "./BotError";
 import * as Constants from "./Constants";
 import { DerpibooruRequest } from "./DerpibooruRequest";
 import Discord from "./node_modules/discord.js/src/index.js";
 import { FourChanRequest } from "./FourChanRequest";
-import { HttpRequest } from "./HttpRequest";
+// import { HttpRequest } from "./HttpRequest";
 import { MessageEmbed } from "./MessageEmbed";
 import * as Path from "path";
 import { promisify } from "util";
 import { readFile } from "fs";
 import util from "./util";
 
+const BOT_ADMINS = ["81203047132307456"]; // Corpulent Brony#1337
 const BOT_NAME = "Twibotism";
 const BOT_SECRETS_FILE = ".bot_secrets.json";
 const BOT_TRIGGER = "!";
@@ -77,7 +79,7 @@ Bot.prototype.commands = {
 				}
 			});
 		} catch (err) {
-			if (err instanceof HttpRequest.Error)
+			if (err instanceof BotError)
 				err.sendEmbed(channel, author);
 			else
 				throw err;
@@ -101,7 +103,19 @@ Bot.prototype.commands = {
 				}
 			});
 		} catch (err) {
-			if (err instanceof HttpRequest.Error)
+			if (err instanceof BotError)
+				err.sendEmbed(channel, author);
+			else
+				throw err;
+		}
+	},
+	async ignore({ author, channel }, args) {
+		try {
+			if (!BOT_ADMINS.includes(author.id))
+				throw new BotError("You do not have the necessary permissions to perform this action.");
+
+		} catch (err) {
+			if (err instanceof BotError)
 				err.sendEmbed(channel, author);
 			else
 				throw err;
@@ -110,7 +124,7 @@ Bot.prototype.commands = {
 	ping({ author, channel, createdTimestamp }) {
 		const description = `Response took: ${util.formatTimestamp(Date.now() - createdTimestamp)}; average socket ping: ${util.formatTimestamp(this.client.ping)}`;
 		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
-		return embed.send(channel, author).catch(console.error);
+		return embed.send(channel, author);
 	}
 };
 // console.log(Discord.Constants);

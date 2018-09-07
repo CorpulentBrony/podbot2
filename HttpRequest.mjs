@@ -1,6 +1,5 @@
-import * as Constants from "./Constants";
+import { BotError } from "./BotError";
 import * as Https from "https";
-import { MessageEmbed } from "./MessageEmbed";
 import * as Path from "path";
 import { promisify } from "util";
 import { readFile } from "fs";
@@ -15,9 +14,6 @@ const APP_URL = "https://iwtcits.com";
 const APP_VERSION_FILE = ".git/refs/heads/master";
 // this is sent as user-agent with the http request.  the text "NOT_YET_CALCULATED" will be replaced with the app version
 const DEFAULT_USER_AGENT = `${APP_NAME}/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; ${ACCEPT_ENCODING}; +${APP_URL}) node/${process.version}`;
-const ERROR_FOOTER = Constants.Emotes.ERROR;
-const ERROR_IMAGE = "https://mlp.one/404.png";
-const ERROR_TITLE = "oopsie woopsie";
 const FAVICON_URL = "https://iwtcits.com/twibedroom.png";
 
 export class HttpRequest {
@@ -40,15 +36,15 @@ export class HttpRequest {
 				let error;
 
 				if (response.statusCode === 404)
-					error = new this.constructor.Error(`No results found for ${query}.  (404)`);
+					error = new BotError(`No results found for ${query}.  (404)`);
 
 				if (response.statusCode === 304)
 					resolve.call(this, undefined);
 
 				if (response.statusCode !== 200)
-					error = new this.constructor.Error(`HTTPS request failed.  Status code: ${response.statusCode.toString()}`);
+					error = new BotError(`HTTPS request failed.  Status code: ${response.statusCode.toString()}`);
 				else if (!/^application\/json/.test(response.headers["content-type"]))
-					error = new this.constructor.Error(`Invalid content-type for HTTPS request.  Expected application/json but received ${response.headers["content-type"]}`);
+					error = new BotError(`Invalid content-type for HTTPS request.  Expected application/json but received ${response.headers["content-type"]}`);
 
 				if (error) {
 					reject(error);
@@ -74,12 +70,6 @@ export class HttpRequest {
 		});
 	}
 }
-HttpRequest.Error = class HttpRequestError extends Error {
-	sendEmbed(channel, author) {
-		const embed = new MessageEmbed({ footer: ERROR_FOOTER, description: this.message, image: { url: ERROR_IMAGE }, title: ERROR_TITLE });
-		embed.send(channel, author);
-	}
-};
 HttpRequest.headers = {
 	encoding: { ["accept-encoding"]: ACCEPT_ENCODING },
 	keepAlive: { connection: "keep-alive" },
