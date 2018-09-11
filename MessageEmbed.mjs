@@ -1,5 +1,6 @@
 import * as Constants from "./Constants";
 import Discord from "./node_modules/discord.js/src/index.js";
+import { IgnoreList } from "./IgnoreList";
 import util from "./util";
 
 const DEFAULT_EMBED_COLOR = 0x673888;
@@ -36,7 +37,6 @@ export class MessageEmbed {
 
 		if (reacts.default || reacts.values.length > 0) {
 			const reactsToSend = (reacts.default ? this.constructor.DEFAULT_REACTS : reacts.values);
-			console.log(reactsToSend);
 			this.message = await this.message;
 
 			for (const react of reactsToSend)
@@ -48,7 +48,8 @@ export class MessageEmbed {
 
 				if (!reacts.collect.options)
 					reacts.collect.options = DEFAULT_REACTS_COLLECT_OPTIONS;
-				const reactionCollector = this.message.createReactionCollector((reaction, user) => !user.bot && reactsToSend.includes(reaction.emoji.name), reacts.collect.options);
+				const reactsToSendDecoded = reactsToSend.map(decodeURI);
+				const reactionCollector = this.message.createReactionCollector((reaction, user) => !user.bot && !IgnoreList.has(user.id) && reactsToSendDecoded.includes(reaction.emoji.name), reacts.collect.options);
 				reactionCollector.on("collect", (reaction) => {
 					switch (reaction.emoji.name) {
 						case Constants.Reacts.STOP: reactionCollector.stop(); break;

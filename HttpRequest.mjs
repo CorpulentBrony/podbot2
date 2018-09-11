@@ -1,9 +1,7 @@
 import { BotError } from "./BotError";
 import * as Https from "https";
-import * as Path from "path";
-import { promisify } from "util";
-import { readFile } from "fs";
 import * as Stream from "stream";
+import util from "./util";
 import * as Zlib from "zlib";
 
 // should be "deflate", "gzip", "deflate, gzip", or "identity"; this is sent as accept-encoding with http request
@@ -76,7 +74,7 @@ HttpRequest.headers = {
 	async getDefault() {
 		if ("default" in this)
 			return this.default;
-		const version = await promisify(readFile)(Path.join(process.cwd(), APP_VERSION_FILE), { encoding: "utf8" });
+		const version = await util.readFile(APP_VERSION_FILE);
 		return this.default = Object.assign({ ["user-agent"]: DEFAULT_USER_AGENT.replace(/NOT_YET_CALCULATED/g, version.trim()) }, this.encoding);
 	}
 };

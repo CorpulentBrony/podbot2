@@ -3,11 +3,8 @@ import * as Constants from "./Constants";
 import { DerpibooruRequest } from "./DerpibooruRequest";
 import Discord from "./node_modules/discord.js/src/index.js";
 import { FourChanRequest } from "./FourChanRequest";
-// import { HttpRequest } from "./HttpRequest";
+import { IgnoreList } from "./IgnoreList";
 import { MessageEmbed } from "./MessageEmbed";
-import * as Path from "path";
-import { promisify } from "util";
-import { readFile } from "fs";
 import util from "./util";
 
 const BOT_ADMINS = ["81203047132307456"]; // Corpulent Brony#1337
@@ -26,21 +23,22 @@ export class Bot {
 			presence: BOT_PRESENCE,
 			ws: { compress: true }
 		});
-		this.client.on("debug", console.log);
+		// this.client.on("debug", console.log);
 		this.client.on("message", this.onMessage.bind(this));
 		this.client.on("ready", this.log.bind(this, this.constructor.messages.ready));
 		this.client.on("reconnecting", this.log.bind(this, this.constructor.messages.reconnecting));
+		IgnoreList.client = this.client;
 	}
 	log(message) { console.log(message); }
 	async login() {
-		const secrets = JSON.parse(await promisify(readFile)(Path.join(process.cwd(), BOT_SECRETS_FILE), { encoding: "utf8" }));
+		const secrets = JSON.parse(await util.readFile(BOT_SECRETS_FILE));
 		this.client.login(secrets.token).catch(console.error);
 		return this;
 	}
 	onMessage(message) {
 		let triggerLength = 0;
 
-		if (!message ||  !message.channel || !message.author || message.author.bot || message.channel.type == "voice")
+		if (!message ||  !message.channel || !message.author || message.author.bot || message.channel.type == "voice" || IgnoreList.has(message.author.id))
 			return;
 		const content = message.content.replace(/[^\S ]/g, " ").replace(/\s{2,}/g, " ").trim();
 
@@ -72,10 +70,10 @@ Bot.prototype.commands = {
 			const reactionCollector = await embed.send(channel, author, reacts);
 			reactionCollector.on("collect", (reaction) => {
 				switch (reaction.emoji.name) {
-					case Constants.Reacts.FIRST: return embed.edit(resultIterator.first().value);
-					case Constants.Reacts.LAST: return embed.edit(resultIterator.last().value);
-					case Constants.Reacts.PREV: return embed.edit(resultIterator.prev().value);
-					case Constants.Reacts.NEXT: return embed.edit(resultIterator.next().value);
+					case Constants.ReactsDecoded.FIRST: return embed.edit(resultIterator.first().value);
+					case Constants.ReactsDecoded.LAST: return embed.edit(resultIterator.last().value);
+					case Constants.ReactsDecoded.PREV: return embed.edit(resultIterator.prev().value);
+					case Constants.ReactsDecoded.NEXT: return embed.edit(resultIterator.next().value);
 				}
 			});
 		} catch (err) {
@@ -96,10 +94,10 @@ Bot.prototype.commands = {
 			const reactionCollector = await embed.send(channel, author, reacts);
 			reactionCollector.on("collect", (reaction) => {
 				switch (reaction.emoji.name) {
-					case Constants.Reacts.FIRST: return embed.edit(resultIterator.first().value);
-					case Constants.Reacts.LAST: return embed.edit(resultIterator.last().value);
-					case Constants.Reacts.PREV: return embed.edit(resultIterator.prev().value);
-					case Constants.Reacts.NEXT: return embed.edit(resultIterator.next().value);
+					case Constants.ReactsDecoded.FIRST: return embed.edit(resultIterator.first().value);
+					case Constants.ReactsDecoded.LAST: return embed.edit(resultIterator.last().value);
+					case Constants.ReactsDecoded.PREV: return embed.edit(resultIterator.prev().value);
+					case Constants.ReactsDecoded.NEXT: return embed.edit(resultIterator.next().value);
 				}
 			});
 		} catch (err) {
@@ -109,11 +107,21 @@ Bot.prototype.commands = {
 				throw err;
 		}
 	},
-	async ignore({ author, channel }, args) {
+	async ignore({ author, channel, mentions }, args) {
 		try {
 			if (!BOT_ADMINS.includes(author.id))
 				throw new BotError("You do not have the necessary permissions to perform this action.");
+			const users = Array.from(mentions.users.values());
 
+			if (users.length > 0) {
+				const changeFunction = (args.startsWith("delete") || args.startsWith("remove")) ? IgnoreList.delete : IgnoreList.add;
+				users.forEach((user) => {
+					if (!BOT_ADMINS.includes(user.id))
+						changeFunction(user.id);
+				});
+			}
+			const embed = new MessageEmbed({ footer: Constants.Emotes.NO_ENTRY, description: `Current ignore list: ${await IgnoreList.toString()}`, title: "Ignore List" });
+			return embed.send(channel, author);
 		} catch (err) {
 			if (err instanceof BotError)
 				err.sendEmbed(channel, author);

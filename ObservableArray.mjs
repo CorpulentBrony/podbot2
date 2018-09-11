@@ -1,3 +1,4 @@
+// this class is no longer currently being used
 class ObservableArray extends Array {
 	onValueChange(index, newValue, oldValue) { console.log({index, newValue, oldValue }); }
 }
