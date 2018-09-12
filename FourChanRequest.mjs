@@ -49,8 +49,8 @@ export class FourChanRequest extends ApiRequest {
 			const threadImages = thread.images ? thread.images.toString() : "0";
 			const threadReplies = thread.replies ? thread.replies.toString() : "0";
 			const value = {
-				description: `${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n${request.constructor.formatHtml(thread.com)}`,
-				footer: { iconURL: FAVICON_URL, text: `${this.index + 1}/${request.results.length}` },
+				description: `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n${request.constructor.formatHtml(thread.com)}`,
+				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
 				title: `${thread.sub ? thread.sub : "Thread"} posted by ${thread.name}`,
 				url: request.baseUrl.toString() + thread.no.toString()
 			};

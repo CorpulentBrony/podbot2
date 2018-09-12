@@ -3,15 +3,16 @@ import * as Constants from "./Constants";
 import { DerpibooruRequest } from "./DerpibooruRequest";
 import Discord from "./node_modules/discord.js/src/index.js";
 import { FourChanRequest } from "./FourChanRequest";
+import * as Google from "./GoogleRequest";
 import { IgnoreList } from "./IgnoreList";
 import { MessageEmbed } from "./MessageEmbed";
 import util from "./util";
 
-const BOT_ADMINS = ["81203047132307456"]; // Corpulent Brony#1337
+const BOT_ADMINS = ["81203047132307456" /* Corpulent Brony#1337 */];
 const BOT_NAME = "Twibotism";
 const BOT_SECRETS_FILE = ".bot_secrets.json";
 const BOT_TRIGGER = "!";
-const BOT_PRESENCE = { activity: { name: "my cringe comp", type: "WATCHING" } };
+const BOT_PRESENCE = { game: { name: "my brony cringe comp", type: 3, url: "https://iwtcits.com/" } };
 
 export class Bot {
 	constructor() {
@@ -23,9 +24,9 @@ export class Bot {
 			presence: BOT_PRESENCE,
 			ws: { compress: true }
 		});
-		// this.client.on("debug", console.log);
+		this.client.on("debug", console.log);
 		this.client.on("message", this.onMessage.bind(this));
-		this.client.on("ready", this.log.bind(this, this.constructor.messages.ready));
+		this.client.on("ready", this.onReady.bind(this));
 		this.client.on("reconnecting", this.log.bind(this, this.constructor.messages.reconnecting));
 		IgnoreList.client = this.client;
 	}
@@ -53,41 +54,13 @@ export class Bot {
 		if (command in this.commands)
 			return this.commands[command].bind(this, message, args)().catch(console.error);
 	}
-}
-
-Bot.messages = {
-	ready: `${BOT_NAME} connected and ready`,
-	reconnecting: `${BOT_NAME} reconnecting to server`
-};
-Bot.prototype.client = undefined;
-Bot.prototype.commands = {
-	async ["4chan"]({ author, channel }, args) {
+	onReady() {
+		this.log(this.constructor.messages.reconnecting);
+		this.client.user.setPresence(BOT_PRESENCE);
+	}
+	async sendApiRequest(ApiRequest, author, channel, args) {
 		try {
-			const request = new FourChanRequest();
-			const resultIterator = await request.query(args);
-			const embed = new MessageEmbed(resultIterator.current().value);
-			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
-			const reactionCollector = await embed.send(channel, author, reacts);
-			reactionCollector.on("collect", (reaction) => {
-				switch (reaction.emoji.name) {
-					case Constants.ReactsDecoded.FIRST: return embed.edit(resultIterator.first().value);
-					case Constants.ReactsDecoded.LAST: return embed.edit(resultIterator.last().value);
-					case Constants.ReactsDecoded.PREV: return embed.edit(resultIterator.prev().value);
-					case Constants.ReactsDecoded.NEXT: return embed.edit(resultIterator.next().value);
-				}
-			});
-		} catch (err) {
-			if (err instanceof BotError)
-				err.sendEmbed(channel, author);
-			else
-				throw err;
-		}
-	},
-	async db({ author, channel }, args) {
-		if (!args)
-			return;
-		try {
-			const request = new DerpibooruRequest();
+			const request = new ApiRequest();
 			const resultIterator = await request.query(args, channel.nsfw);
 			const embed = new MessageEmbed(resultIterator.current().value);
 			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
@@ -106,6 +79,27 @@ Bot.prototype.commands = {
 			else
 				throw err;
 		}
+	}
+}
+
+Bot.messages = {
+	ready: `${BOT_NAME} connected and ready`,
+	reconnecting: `${BOT_NAME} reconnecting to server`
+};
+Bot.prototype.client = undefined;
+Bot.prototype.commands = {
+	async ["4"](...args) { return this.commands["4chan"].bind(this)(...args); },
+	async ["4chan"]({ author, channel }, args) { return this.sendApiRequest(FourChanRequest, author, channel, args); },
+	async db({ author, channel }, args) {
+		if (!args)
+			return;
+		return this.sendApiRequest(DerpibooruRequest, author, channel, args);
+	},
+	async g(...args) { return this.commands.google.bind(this)(...args); },
+	async google({ author, channel }, args) {
+		if (!args)
+			return;
+		return this.sendApiRequest(Google.SearchRequest, author, channel, args);
 	},
 	async ignore({ author, channel, mentions }, args) {
 		try {

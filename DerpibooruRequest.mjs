@@ -46,7 +46,7 @@ export class DerpibooruRequest extends ApiRequest {
 					name: `${imageFileName} uploaded by ${image.uploader}`.trim(),
 					value: `${image.faves}${Constants.Emotes.STAR} ${image.upvotes}${Constants.Emotes.UP} ${image.downvotes}${Constants.Emotes.DOWN} ${image.comment_count}${Constants.Emotes.COMMENT}`
 				},
-				footer: { iconURL: FAVICON_URL, text: `${this.index + 1}/${request.results.length}\n${image.tags}` },
+				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
 				image: { url: imageUrl.toString() },
 				title: pageUrl.toString(),
 				url: pageUrl.toString()

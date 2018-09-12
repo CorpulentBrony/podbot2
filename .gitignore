@@ -1,4 +1,5 @@
 .bot_secrets.json
+.google_secrets.json
 .ignore_list.json
 github
 node_modules/

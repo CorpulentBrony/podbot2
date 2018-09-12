@@ -17,9 +17,10 @@
   },
   "main": "index.mjs",
   "scripts": {
-    "_start": "NODE_ENV=production pm2 start index.mjs --name=\"podbot2\"",
-    "start": "node --experimental-modules index.mjs",
-    "stop": "pm2 stop \"podbot2\"",
+  	"restart": "NODE_ENV=production forever restart -c \"node --experimental-modules\" index.mjs",
+    "start": "NODE_ENV=production forever start -c \"node --experimental-modules\" index.mjs",
+    "interactive": "node --experimental-modules index.mjs",
+    "stop": "forever stop index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
