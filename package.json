@@ -17,9 +17,9 @@
   },
   "main": "index.mjs",
   "scripts": {
-  	"restart": "NODE_ENV=production forever restart -c \"node --experimental-modules\" index.mjs",
-    "start": "NODE_ENV=production forever start -c \"node --experimental-modules\" index.mjs",
-    "interactive": "node --experimental-modules index.mjs",
+  	"restart": "NODE_ENV=production forever restart -c \"node --experimental-modules --loader ./loader.mjs\" index.mjs",
+    "start": "NODE_ENV=production forever start -c \"node --experimental-modules --loader ./loader.mjs\" index.mjs",
+    "interactive": "node --experimental-modules --loader ./loader.mjs index.mjs",
     "stop": "forever stop index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -56,7 +56,7 @@ export class MessageEmbed {
 						case Constants.Reacts.DEL: reaction.message.delete().catch(console.error);
 					}
 				});
-				reactionCollector.on("end", () => this.removeReactions(reactsToSend).catch(console.error));
+				reactionCollector.on("end", () => this.removeReactions(reactsToSendDecoded).catch(console.error));
 				return reactionCollector;
 			}
 		}
@@ -67,11 +67,11 @@ MessageEmbed.DEFAULT_REACTS = DEFAULT_REACTS_DISPLAY_ORDER.map((reactName) => DE
 MessageEmbed.Embed = class Embed {
 	constructor(options) {
 		this.assign(options);
-
-		if (typeof this.color !== "number")
-			this.color = DEFAULT_EMBED_COLOR;
 	}
 	assign(options) {
+		if (typeof options.color !== "number")
+			options.color = DEFAULT_EMBED_COLOR;
+
 		for (const optionKey in options)
 			switch (optionKey) {
 				case "channel": break;

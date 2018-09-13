@@ -1,6 +1,6 @@
 import { ApiRequest } from "./ApiRequest";
-import { arrayShuffle } from "./util";
-import * as Constants from "./Constants";
+import { arrayShuffle } from "/util";
+import * as Constants from "/Constants";
 
 const BASE_URL = "https://derpibooru.org";
 const FAVICON_URL = "https://derpicdn.net/img/2017/6/14/1461521/thumb.png";

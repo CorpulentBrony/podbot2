@@ -1,6 +1,7 @@
 import { ApiRequest } from "./ApiRequest";
-import { arrayShuffle } from "./util";
-import * as Constants from "./Constants";
+import { arrayShuffle } from "/util";
+import { BotError } from "/BotError";
+import * as Constants from "/Constants";
 import He from "he";
 import * as Path from "path";
 
@@ -37,7 +38,7 @@ export class FourChanRequest extends ApiRequest {
 			results = response.posts;
 
 		if (results.length === 0)
-			throw new this.constructor.Error(`No threads were found for \`${queryString}\``);
+			throw new BotError(`No threads were found for \`${queryString}\``);
 		this.results = results;
 		this.length = this.results.length;
 		return this.getBidirectionalIterator();

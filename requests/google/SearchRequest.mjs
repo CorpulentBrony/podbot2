@@ -1,23 +1,12 @@
-import { ApiRequest } from "./ApiRequest";
-import * as Constants from "./Constants";
-import util from "./util";
+import { GoogleRequest } from "./GoogleRequest";
 
 const BASE_URL = "https://www.googleapis.com";
 const FAVICON_URL = "https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png";
-const FILTERS = { safe: "high", nsfw: "off" };
-const SEARCH_ENGINE_ID = "006965754145483107019:1pwwebw_oo0";
-const SEARCH_PATH = "/customsearch/v1";
-const SECRETS_FILE = ".google_secrets.json";
+const SEARCH_FIELDS = "items(link,pagemap(cse_image/src,cse_thumbnail/src,metatags/theme-color,scraped/image_link),snippet,title),searchInformation(totalResults)";
+// items(image/contextLink,link,pagemap(cse_image/src,cse_thumbnail/src),snippet,title),searchInformation(formattedSearchTime,formattedTotalResults)
+const SEARCH_PATH = "/customsearch/v1"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
 
-class Common {
-	static get secrets() {
-		delete this.secrets;
-		return this.secrets = this.getSecrets();
-	}
-	static async getSecrets() { return JSON.parse(await util.readFile(SECRETS_FILE)); }
-}
-
-export class SearchRequest extends ApiRequest {
+export class SearchRequest extends GoogleRequest {
 	static getThumbnailUrl(result) {
 		if (!("pagemap" in result))
 			return FAVICON_URL;
@@ -34,17 +23,7 @@ export class SearchRequest extends ApiRequest {
 		return { url: urls[0] };
 	}
 	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
-	async query(queryString, isNsfw = false) {
-		const secrets = await Common.secrets;
-		const query = { cx: secrets.searchEngineId, key: secrets.apiKey, q: queryString.replace(/best pony/g, "twilight sparkle"), safe: isNsfw ? FILTERS.nsfw : FILTERS.safe };
-		let response = await super.query("GET", query);
-
-		if (Number.parseInt(response.searchInformation.totalResults) === 0)
-			throw new this.constructor.Error(`No results were found for \`${queryString}\``);
-		this.length = response.items.length;
-		this.results = response.items;
-		return this.getBidirectionalIterator();
-	}
+	async query(queryString, isNsfw = false) { return super.query({ q: queryString }, isNsfw); }
 	getBidirectionalIterator() {
 		const request = this;
 		const current = function() {
@@ -57,8 +36,8 @@ export class SearchRequest extends ApiRequest {
 				url: result.link
 			};
 
-			if (Array.isArray(result.metatags))
-				value.color = result.metatags.map((metatag) => Number.parseInt(metatag["theme-color"].slice(1), 16)).find((color) => !Number.isNaN(color));
+			if ("pagemap" in result && Array.isArray(result.pagemap.metatags))
+				value.color = result.pagemap.metatags.map((metatag) => (typeof metatag["theme-color"] === "string") ? Number.parseInt(metatag["theme-color"].slice(1), 16) : Number.NaN).find((color) => !Number.isNaN(color));
 			return { done: false, value };
 		};
 		return super.getBidirectionalIterator(current);

@@ -1,7 +1,7 @@
-import { BotError } from "./BotError";
+import { BotError } from "/BotError";
 import * as Https from "https";
 import * as Stream from "stream";
-import util from "./util";
+import util from "/util";
 import * as Zlib from "zlib";
 
 // should be "deflate", "gzip", "deflate, gzip", or "identity"; this is sent as accept-encoding with http request
