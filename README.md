@@ -20,10 +20,11 @@ Bot can respond to commands in any channels where it has permission to do so if 
 * <code>ignore <var>remove | delete</var> <var>user mention</var></code> - This command can only be used by a bot admin (defined at the top of the [Bot.mjs](Bot.mjs) file).  If given with no arguments, will display a list of users currently on the ignore list.  If given with just a user mention, will add that user to the ignore list.  If the command begins with *remove* or *delete* followed by one or more user mentions, will remove those users from the ignore list.  The bot will simply ignore all users on the ignore list, including all commands and reactions.  You cannot ignore someone in the admin list.
 * <code>image <var>**search**</var></code> (alias `i` and `img`) - Searches [Google images](https://images.google.com/) for the given search term and returns the ten most applicable images, supports full Google search syntax.  Must specify a search phrase.
 * `ping` - Will show the current and average ping times to the bot's server. The current ping time is based on the timestamp value attached to the command's message and the server's timestamp. The average is directly from the discord.js API.
+* <code>youtube <var>**search**</var></code> (alias `yt`) - Searches [YouTube](https://youtube.com) for the given search term and returns the most applicable videos, supports full YouTube search syntax.  Must specify a search phrase.
 
-## What will it be able to do?
+## What else might it do in the future?
 
-In addition to what it can already do as listed above: [YouTube](https://youtube.com) search, using its API.  More documentation to come as more functions are implemented.
+Not sure, but I think [FimFiction](https://www.fimfiction.net/) has an API, so might implement searching that site too?  What would you like to see?
 
 ## Who is best horse?
 

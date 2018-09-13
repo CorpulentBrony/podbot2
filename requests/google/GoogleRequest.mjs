@@ -28,4 +28,5 @@ export class GoogleRequest extends ApiRequest {
 		return this.getBidirectionalIterator();
 	}
 }
+GoogleRequest.BASE_URL = BASE_URL;
 GoogleRequest.FAVICON_URL = FAVICON_URL;

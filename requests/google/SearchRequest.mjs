@@ -18,7 +18,6 @@ export class SearchRequest extends GoogleRequest {
 			return undefined;
 		return { url: urls[0] };
 	}
-	async query(queryString, isNsfw = false) { return super.query({ q: queryString }, isNsfw); }
 	getBidirectionalIterator() {
 		const request = this;
 		const current = function() {
@@ -37,4 +36,5 @@ export class SearchRequest extends GoogleRequest {
 		};
 		return super.getBidirectionalIterator(current);
 	}
+	async query(queryString, isNsfw = false) { return super.query({ q: queryString }, isNsfw); }
 }

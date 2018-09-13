@@ -132,6 +132,12 @@ Bot.prototype.commands = {
 		const description = `Response took: ${util.formatTimestamp(Date.now() - createdTimestamp)}; average socket ping: ${util.formatTimestamp(this.client.ping)}`;
 		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
 		return embed.send(channel, author);
-	}
+	},
+	async youtube({ author, channel }, args) {
+		if (!args)
+			return;
+		return this.sendApiRequest(Requests.Google.YouTube, author, channel, args);
+	},
+	async yt(...args) { return this.commands.youtube.bind(this)(...args); }
 };
 // console.log(Discord.Constants);

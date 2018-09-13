@@ -15,9 +15,14 @@ export class MessageEmbed {
 		if (options.channel)
 			this.channel = options.channel;
 	}
+	get isEmbedVideo() { return this.embed.video && typeof this.embed.video.url === "string"; }
 	async edit(options) {
 		const message = await this.message;
-		return message.edit(undefined, { embed: this.embed.assign(options) });
+		const embed = this.embed.assign(options);
+
+		if (this.isEmbedVideo)
+			return message.edit(embed.video.url);
+		return message.edit(undefined, { embed: embed });
 	}
 	async removeReactions(reactsToDelete) {
 		const canRemoveReacts = this.message.member.hasPermission(Discord.Permissions.FLAGS.MANAGE_MESSAGES);
@@ -33,7 +38,8 @@ export class MessageEmbed {
 	async send(channel = this.channel, author = this.embed.author, reacts) {
 		author = (typeof author === "object") ? { author: { icon_url: util.toString(author.avatarURL), name: util.toString(author.username) } } : {};
 		reacts = (typeof reacts !== "object") ? { default: false, values: [] } : { collect: reacts.collect, default: Boolean(reacts.default), values: Array.isArray(reacts.values) ? reacts.values : [] };
-		this.message = channel.send(undefined, { embed: Object.assign(this.embed, author) }).catch(console.error);
+		const args = this.isEmbedVideo ? [this.embed.video.url] : [undefined, { embed: Object.assign(this.embed, author) }];
+		this.message = channel.send(...args).catch(console.error);
 
 		if (reacts.default || reacts.values.length > 0) {
 			const reactsToSend = (reacts.default ? this.constructor.DEFAULT_REACTS : reacts.values);
