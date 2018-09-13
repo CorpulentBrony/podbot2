@@ -1,8 +1,11 @@
 import { ApiRequest } from "/requests/ApiRequest";
 import util from "/util";
 
+const BASE_URL = "https://www.googleapis.com";
+const FAVICON_URL = "https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png";
 const FILTERS = { safe: "active", nsfw: "off" };
 const SEARCH_LANGUAGE = "lang_en"; // https://developers.google.com/custom-search/docs/xml_results_appendices#languageCollections
+const SEARCH_PATH = "/customsearch/v1"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
 const SECRETS_FILE = ".google_secrets.json";
 
 export class GoogleRequest extends ApiRequest {
@@ -11,6 +14,7 @@ export class GoogleRequest extends ApiRequest {
 		return Object.defineProperty(this, "secrets", { value: this.getSecrets() }).secrets;
 	}
 	static async getSecrets() { return JSON.parse(await util.readFile(SECRETS_FILE)); }
+	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
 	async query(query, isNsfw) {
 		const secrets = await this.constructor.secrets;
 		Object.assign(query, { cx: secrets.searchEngineId, hl: SEARCH_LANGUAGE, key: secrets.apiKey, safe: isNsfw ? FILTERS.nsfw : FILTERS.safe });
@@ -24,3 +28,4 @@ export class GoogleRequest extends ApiRequest {
 		return this.getBidirectionalIterator();
 	}
 }
+GoogleRequest.FAVICON_URL = FAVICON_URL;

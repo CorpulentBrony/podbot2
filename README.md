@@ -18,11 +18,12 @@ Bot can respond to commands in any channels where it has permission to do so if 
 * <code>db <var>**search**</var> | <var>**id**</var></code> - Searches [Derpibooru](https://www.derpibooru.org/) for the given search term (or image ID) and returns a randomized page from the search results with the results on that page randomized as well.  Supports full search syntax from the Derpibooru site.  Must specify either a search phrase or an image ID.
 * <code>google <var>**search**</var></code> (alias `g`) - Searches [Google](https://www.google.com/) for the given search term and returns the ten most applicable answers, supports full Google search syntax.  Must specify a search phrase.
 * <code>ignore <var>remove | delete</var> <var>user mention</var></code> - This command can only be used by a bot admin (defined at the top of the [Bot.mjs](Bot.mjs) file).  If given with no arguments, will display a list of users currently on the ignore list.  If given with just a user mention, will add that user to the ignore list.  If the command begins with *remove* or *delete* followed by one or more user mentions, will remove those users from the ignore list.  The bot will simply ignore all users on the ignore list, including all commands and reactions.  You cannot ignore someone in the admin list.
+* <code>image <var>**search**</var></code> (alias `i` and `img`) - Searches [Google images](https://images.google.com/) for the given search term and returns the ten most applicable images, supports full Google search syntax.  Must specify a search phrase.
 * `ping` - Will show the current and average ping times to the bot's server. The current ping time is based on the timestamp value attached to the command's message and the server's timestamp. The average is directly from the discord.js API.
 
 ## What will it be able to do?
 
-In addition to what it can already do as listed above: [Google image](https://images.google.com/) and [YouTube](https://youtube.com) searches, all using their respective APIs.  More documentation to come as more functions are implemented.
+In addition to what it can already do as listed above: [YouTube](https://youtube.com) search, using its API.  More documentation to come as more functions are implemented.
 
 ## Who is best horse?
 

@@ -99,6 +99,7 @@ Bot.prototype.commands = {
 			return;
 		return this.sendApiRequest(Requests.Google.Search, author, channel, args);
 	},
+	async i(...args) { return this.commands.image.bind(this)(...args); },
 	async ignore({ author, channel, mentions }, args) {
 		try {
 			if (!BOT_ADMINS.includes(author.id))
@@ -121,6 +122,12 @@ Bot.prototype.commands = {
 				throw err;
 		}
 	},
+	async image({ author, channel }, args) {
+		if (!args)
+			return;
+		return this.sendApiRequest(Requests.Google.Image, author, channel, args);
+	},
+	async img(...args) { return this.commands.image.bind(this)(...args); },
 	ping({ author, channel, createdTimestamp }) {
 		const description = `Response took: ${util.formatTimestamp(Date.now() - createdTimestamp)}; average socket ping: ${util.formatTimestamp(this.client.ping)}`;
 		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
