@@ -1,4 +1,4 @@
-import { ApiRequest } from "./ApiRequest";
+import { HttpRequest } from "./HttpRequest";
 import { arrayShuffle } from "/util";
 import { BotError } from "/BotError";
 import * as Constants from "/Constants";
@@ -12,10 +12,29 @@ const DEFAULT_BOARD = "mlp";
 const FAVICON_URL = "https://s.4cdn.org/image/apple-touch-icon-iphone-retina.png";
 const SEARCH_PATH = "catalog.json";
 
-export class FourChanRequest extends ApiRequest {
+export class FourChanRequest extends HttpRequest {
 	constructor(board = DEFAULT_BOARD) {
 		super(new URL(Path.resolve("/", board, SEARCH_PATH), BASE_API_URL));
 		[this.baseUrl, this.board] = [new URL(`${Path.resolve("/", board, "thread")}/`, BASE_LINK_URL), board];
+	}
+	getBidirectionalIterator() {
+		const request = this;
+		const current = function() {
+			const thread = request.results[this.index];
+			const threadImages = thread.images ? thread.images.toString() : "0";
+			const threadReplies = thread.replies ? thread.replies.toString() : "0";
+			const value = {
+				description: `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n${request.constructor.formatHtml(thread.com)}`,
+				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
+				title: `${thread.sub ? thread.sub : "Thread"} posted by ${thread.name}`,
+				url: request.baseUrl.toString() + thread.no.toString()
+			};
+
+			if (thread.tim)
+				value.image = { url: BASE_IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) };
+			return { done: false, value };
+		};
+		return super.getBidirectionalIterator(current);
 	}
 	async query(queryString) {
 		const threadNumber = Number.parseInt(queryString).toString();
@@ -42,25 +61,6 @@ export class FourChanRequest extends ApiRequest {
 		this.results = results;
 		this.length = this.results.length;
 		return this.getBidirectionalIterator();
-	}
-	getBidirectionalIterator() {
-		const request = this;
-		const current = function() {
-			const thread = request.results[this.index];
-			const threadImages = thread.images ? thread.images.toString() : "0";
-			const threadReplies = thread.replies ? thread.replies.toString() : "0";
-			const value = {
-				description: `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n${request.constructor.formatHtml(thread.com)}`,
-				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
-				title: `${thread.sub ? thread.sub : "Thread"} posted by ${thread.name}`,
-				url: request.baseUrl.toString() + thread.no.toString()
-			};
-
-			if (thread.tim)
-				value.image = { url: BASE_IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) };
-			return { done: false, value };
-		};
-		return super.getBidirectionalIterator(current);
 	}
 }
 FourChanRequest.formatHtml = function(html) { return (typeof html === "string") ? He.decode(html.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "")) : ""; };

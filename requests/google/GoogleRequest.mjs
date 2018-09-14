@@ -1,4 +1,4 @@
-import { ApiRequest } from "/requests/ApiRequest";
+import { HttpRequest } from "/requests/HttpRequest";
 import util from "/util";
 
 const BASE_URL = "https://www.googleapis.com";
@@ -8,7 +8,7 @@ const SEARCH_LANGUAGE = "lang_en"; // https://developers.google.com/custom-searc
 const SEARCH_PATH = "/customsearch/v1"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
 const SECRETS_FILE = ".google_secrets.json";
 
-export class GoogleRequest extends ApiRequest {
+export class GoogleRequest extends HttpRequest {
 	static get secrets() {
 		delete this.secrets;
 		return Object.defineProperty(this, "secrets", { value: this.getSecrets() }).secrets;

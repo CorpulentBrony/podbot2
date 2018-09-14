@@ -1,4 +1,4 @@
-import { ApiRequest } from "./ApiRequest";
+import { HttpRequest } from "./HttpRequest";
 import { arrayShuffle } from "/util";
 import * as Constants from "/Constants";
 
@@ -7,8 +7,29 @@ const FAVICON_URL = "https://derpicdn.net/img/2017/6/14/1461521/thumb.png";
 const FILTERS = { safe: 100073, nsfw: 56027 };
 const SEARCH_PATH = "/search.json";
 
-export class DerpibooruRequest extends ApiRequest {
+export class DerpibooruRequest extends HttpRequest {
 	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
+	getBidirectionalIterator() {
+		const request = this;
+		const current = function() {
+			const image = request.results[this.index];
+			const imageFileName = (image.file_name === null) ? "" : image.file_name;
+			const imageUrl = new URL(`https:${image.image}`);
+			const pageUrl = new URL(`/${image.id.toString()}`, BASE_URL);
+			const value = {
+				fields: {
+					name: `${imageFileName} uploaded by ${image.uploader}`.trim(),
+					value: `${image.faves}${Constants.Emotes.STAR} ${image.upvotes}${Constants.Emotes.UP} ${image.downvotes}${Constants.Emotes.DOWN} ${image.comment_count}${Constants.Emotes.COMMENT}`
+				},
+				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
+				image: { url: imageUrl.toString() },
+				title: pageUrl.toString(),
+				url: pageUrl.toString()
+			};
+			return { done: false, value };
+		};
+		return super.getBidirectionalIterator(current);
+	}
 	async query(queryString, isNsfw = false) {
 		const query = {
 			filter_id: isNsfw ? FILTERS.nsfw : FILTERS.safe,
@@ -33,26 +54,5 @@ export class DerpibooruRequest extends ApiRequest {
 		this.length = images.length;
 		this.results = images;
 		return this.getBidirectionalIterator();
-	}
-	getBidirectionalIterator() {
-		const request = this;
-		const current = function() {
-			const image = request.results[this.index];
-			const imageFileName = (image.file_name === null) ? "" : image.file_name;
-			const imageUrl = new URL(`https:${image.image}`);
-			const pageUrl = new URL(`/${image.id.toString()}`, BASE_URL);
-			const value = {
-				fields: {
-					name: `${imageFileName} uploaded by ${image.uploader}`.trim(),
-					value: `${image.faves}${Constants.Emotes.STAR} ${image.upvotes}${Constants.Emotes.UP} ${image.downvotes}${Constants.Emotes.DOWN} ${image.comment_count}${Constants.Emotes.COMMENT}`
-				},
-				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
-				image: { url: imageUrl.toString() },
-				title: pageUrl.toString(),
-				url: pageUrl.toString()
-			};
-			return { done: false, value };
-		};
-		return super.getBidirectionalIterator(current);
 	}
 }

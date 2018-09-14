@@ -1,6 +1,6 @@
 import { BotError } from "./BotError";
 import * as Constants from "./Constants";
-import Discord from "./node_modules/discord.js/src/index.js";
+import Discord from "discord.js";
 import { IgnoreList } from "./IgnoreList";
 import { MessageEmbed } from "./MessageEmbed";
 import * as Requests from "./requests/";

@@ -17,7 +17,7 @@
   },
   "main": "index.mjs",
   "scripts": {
-  	"restart": "NODE_ENV=production forever restart -c \"node --experimental-modules --loader ./loader.mjs\" index.mjs",
+    "restart": "NODE_ENV=production forever restart -c \"node --experimental-modules --loader ./loader.mjs\" index.mjs",
     "start": "NODE_ENV=production forever start -c \"node --experimental-modules --loader ./loader.mjs\" index.mjs",
     "interactive": "node --experimental-modules --loader ./loader.mjs index.mjs",
     "stop": "forever stop index.mjs",
@@ -38,6 +38,7 @@
     "discord.js": "^11.4.2",
     "erlpack": "github:discordapp/erlpack",
     "he": ">=1.1.1",
+    "iltorb": "^2.4.0",
     "libsodium-wrappers": "^0.7.3",
     "node-opus": "^0.2.9",
     "sodium": "^2.0.3",

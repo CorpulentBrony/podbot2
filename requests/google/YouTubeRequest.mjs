@@ -1,4 +1,4 @@
-import { ApiRequest } from "/requests/ApiRequest";
+import { HttpRequest } from "/requests/HttpRequest";
 import { GoogleRequest } from "./GoogleRequest";
 
 const FILTERS = { safe: "strict", nsfw: "none" };
@@ -7,7 +7,7 @@ const RESULT_BASE_URL = "https://www.youtube.com";
 const SEARCH_PATH = "/youtube/v3/search"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
 const WATCH_URL = new URL("https://www.youtube.com/watch");
 
-export class YouTubeRequest extends ApiRequest {
+export class YouTubeRequest extends HttpRequest {
 	constructor() { super(new URL(SEARCH_PATH, GoogleRequest.BASE_URL)); }
 	getBidirectionalIterator() {
 		const request = this;
