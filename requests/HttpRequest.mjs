@@ -39,6 +39,28 @@ export class HttpRequest {
 		[this.headers, this.url, this.useKeepAlive] = [headers, (typeof url === "string") ? new URL(url) : url, useKeepAlive];
 		this.agent = new Https.Agent({ keepAlive: this.useKeepAlive });
 	}
+	generateHttpsRequest(options) {
+		return new Promise((resolve, reject) => {
+			Https.request(options, (response) => {
+				const finalize = new Stream.PassThrough();
+				let objectString = "";
+				finalize.on("data", (chunk) => { objectString += chunk.toString(); });
+				finalize.on("end", () => {
+					try { resolve.call(this, { data: objectString, headers: response.headers, status: response.statusCode }); }
+					catch (err) { reject(err); }
+				});
+
+				switch (response.headers["content-encoding"]) {
+					case "br": response.pipe(Iltorb.decompressStream()).pipe(finalize); break;
+					case "deflate": response.pipe(Zlib.createInflate()).pipe(finalize); break;
+					case "gzip": response.pipe(Zlib.createGunzip()).pipe(finalize); break;
+					default: response.pipe(finalize);
+				}
+			})
+			.on("error", reject)
+			.end();
+		});
+	}
 	getBidirectionalIterator(current) {
 		const request = this;
 		const first = function() {
@@ -71,45 +93,13 @@ export class HttpRequest {
 		if (query)
 			for (const item in query)
 				url.searchParams.append(item, query[item]);
-		const options = Object.assign({ agent: this.agent, headers, method }, this.constructor.urlToOptions(url));
-		return new Promise((resolve, reject) => {
-			Https.request(options, (response) => {
-				let error;
+		const response = await this.generateHttpsRequest(Object.assign({ agent: this.agent, headers, method }, this.constructor.urlToOptions(url)));
 
-				if (response.statusCode === 404)
-					error = new BotError(`No results found for ${query}.  (404)`);
-
-				if (response.statusCode === 304)
-					resolve.call(this, undefined);
-
-				if (response.statusCode !== 200)
-					error = new BotError(`HTTPS request failed.  Status code: ${response.statusCode.toString()}`);
-				else if (!/^application\/json/.test(response.headers["content-type"]))
-					error = new BotError(`Invalid content-type for HTTPS request.  Expected application/json but received ${response.headers["content-type"]}`);
-
-				if (error) {
-					reject(error);
-					response.resume();
-					return;
-				}
-				const finalize = new Stream.PassThrough();
-				let objectString = "";
-				finalize.on("data", (chunk) => { objectString += chunk.toString(); });
-				finalize.on("end", () => {
-					try { resolve.call(this, JSON.parse(objectString)); }
-					catch (err) { reject(err); }
-				});
-
-				switch (response.headers["content-encoding"]) {
-					case "br": response.pipe(Iltorb.decompressStream()).pipe(finalize); break;
-					case "deflate": response.pipe(Zlib.createInflate()).pipe(finalize); break;
-					case "gzip": response.pipe(Zlib.createGunzip()).pipe(finalize); break;
-					default: response.pipe(finalize);
-				}
-			})
-			.on("error", reject)
-			.end();
-		});
+		if (response.status === 404)
+			throw new BotError(`No results found for ${query}.  (404)`);
+		else if (response.status !== 200 && response.status !== 304)
+			throw new BotError(`HTTPS request failed.  Status code: ${response.status.toString()}`);
+		return JSON.parse(response.data);
 	}
 }
 HttpRequest.headers = {
