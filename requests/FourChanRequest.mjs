@@ -23,15 +23,16 @@ export class FourChanRequest extends HttpRequest {
 			const thread = request.results[this.index];
 			const threadImages = thread.images ? thread.images.toString() : "0";
 			const threadReplies = thread.replies ? thread.replies.toString() : "0";
+			const isSingleThread = request.isSingleThread && this.index > 0;
+			const threadDetail = isSingleThread ? "" : `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n`;
+			request.baseUrl.hash = isSingleThread ? `p${thread.no.toString()}` : "";
 			const value = {
-				description: `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n${request.constructor.formatHtml(thread.com)}`,
+				description: `${threadDetail}${request.constructor.formatHtml(thread.com)}`,
 				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
+				image: thread.tim ? { url: BASE_IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) } : undefined,
 				title: `${thread.sub ? thread.sub : "Thread"} posted by ${thread.name}`,
-				url: request.baseUrl.toString() + thread.no.toString()
+				url: request.baseUrl.toString()
 			};
-
-			if (thread.tim)
-				value.image = { url: BASE_IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) };
 			return { done: false, value };
 		};
 		return super.getBidirectionalIterator(current);
@@ -42,7 +43,7 @@ export class FourChanRequest extends HttpRequest {
 		let results = [];
 
 		if (queryStringIsNumeric)
-			[this.baseUrl.pathname, this.url] = [`${this.baseUrl.pathname}${threadNumber}#p`, new URL(Path.resolve("/", this.board, "thread", `${threadNumber}.json`), BASE_API_URL)];
+			[this.baseUrl.pathname, this.isSingleThread, this.url] = [`${this.baseUrl.pathname}${threadNumber}`, true, new URL(Path.resolve("/", this.board, "thread", `${threadNumber}.json`), BASE_API_URL)];
 		const response = await super.query();
 
 		if (!queryStringIsNumeric) {
@@ -52,7 +53,11 @@ export class FourChanRequest extends HttpRequest {
 				const regExps = queryString.split(",").map((term) => new RegExp(`\\b${term.trim().replace("*", "[^\\b]*")}\\b`, "i"));
 				results = threads.filter((thread) => regExps.every((regExp) => thread.com && regExp.test(thread.com) || thread.sub && regExp.test(thread.sub)));
 			} else
-				results = arrayShuffle(threads);
+				results = threads;
+
+			if (results.length === 1)
+				return this.query(results[0].no);
+			results = arrayShuffle(results);
 		} else
 			results = response.posts;
 
@@ -66,3 +71,4 @@ export class FourChanRequest extends HttpRequest {
 FourChanRequest.formatHtml = function(html) { return (typeof html === "string") ? He.decode(html.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "")) : ""; };
 FourChanRequest.prototype.baseUrl = BASE_API_URL;
 FourChanRequest.prototype.board = DEFAULT_BOARD;
+FourChanRequest.prototype.isSingleThread = false;

@@ -6,6 +6,7 @@ import { MessageEmbed } from "./MessageEmbed";
 import * as Requests from "./requests/";
 import util from "./util";
 
+// join link: https://discordapp.com/api/oauth2/authorize?client_id=479736033223901196&permissions=60488&scope=bot
 const BOT_ADMINS = ["81203047132307456" /* Corpulent Brony#1337 */];
 const BOT_NAME = "Twibotism";
 const BOT_SECRETS_FILE = ".bot_secrets.json";
@@ -140,6 +141,8 @@ Bot.prototype.commands = {
 		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
 		return embed.send(channel, author);
 	},
+	async ntt({ author, channel }) { return this.commands["4chan"].bind(this)({ author, channel }, "nightly twilight"); },
+	async plush({ author, channel }) { return this.commands["4chan"].bind(this)({ author, channel }, "plush"); },
 	async youtube({ author, channel }, args) {
 		if (!args)
 			return;

@@ -104,7 +104,7 @@ export class HttpRequest {
 			return cacheItem.data;
 		else if (cacheItem.hasConditionalRequest)
 			Object.assign(headers, (typeof cacheItem.etag === "string") ? { ["if-none-match"]: cacheItem.etag } : { ["if-modified-since"]: cacheItem.lastModified });
-		console.log({ url: url.href });
+		// console.log({ url: url.href });
 		const response = await this.generateHttpsRequest(Object.assign({ agent: this.agent, headers, method }, this.constructor.urlToOptions(url)));
 
 		if (response.status === 404)
