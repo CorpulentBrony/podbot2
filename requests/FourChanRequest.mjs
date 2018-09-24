@@ -63,6 +63,6 @@ export class FourChanRequest extends HttpRequest {
 		return this.getBidirectionalIterator();
 	}
 }
-FourChanRequest.formatHtml = function(html) { return (typeof html === "string") ? He.decode(html.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "")) : ""; };
+FourChanRequest.formatHtml = function(html) { return (typeof html === "string") ? He.decode(html.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "")) : ""; };
 FourChanRequest.prototype.baseUrl = BASE_API_URL;
 FourChanRequest.prototype.board = DEFAULT_BOARD;

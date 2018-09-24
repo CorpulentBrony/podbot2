@@ -13,17 +13,22 @@ export class DerpibooruRequest extends HttpRequest {
 		const request = this;
 		const current = function() {
 			const image = request.results[this.index];
+			const commentCount = image.comment_count.toLocaleString();
+			const downvotes = image.downvotes.toLocaleString();
+			const faves = image.faves.toLocaleString();
 			const imageFileName = (image.file_name === null) ? "" : image.file_name;
 			const imageUrl = new URL(`https:${image.image}`);
 			const pageUrl = new URL(`/${image.id.toString()}`, BASE_URL);
+			const upvotes = image.upvotes.toLocaleString();
 			const value = {
+				description: image.description,
 				fields: {
-					name: `${imageFileName} uploaded by ${image.uploader}`.trim(),
-					value: `${image.faves}${Constants.Emotes.STAR} ${image.upvotes}${Constants.Emotes.UP} ${image.downvotes}${Constants.Emotes.DOWN} ${image.comment_count}${Constants.Emotes.COMMENT}`
+					name: "--",
+					value: `${faves}${Constants.Emotes.STAR} ${upvotes}${Constants.Emotes.UP} ${downvotes}${Constants.Emotes.DOWN} ${commentCount}${Constants.Emotes.COMMENT}`
 				},
 				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
 				image: { url: imageUrl.toString() },
-				title: pageUrl.toString(),
+				title: `${imageFileName} uploaded by ${image.uploader}`.trim(),
 				url: pageUrl.toString()
 			};
 			return { done: false, value };

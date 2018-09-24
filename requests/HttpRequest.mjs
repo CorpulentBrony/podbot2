@@ -1,4 +1,5 @@
 import { BotError } from "/BotError";
+import { HttpCache } from "./HttpCache";
 import * as Https from "https";
 import Iltorb from "iltorb";
 import * as Stream from "stream";
@@ -39,9 +40,9 @@ export class HttpRequest {
 		[this.headers, this.url, this.useKeepAlive] = [headers, (typeof url === "string") ? new URL(url) : url, useKeepAlive];
 		this.agent = new Https.Agent({ keepAlive: this.useKeepAlive });
 	}
-	generateHttpsRequest(options) {
+	generateHttpsRequest(options, body = undefined) {
 		return new Promise((resolve, reject) => {
-			Https.request(options, (response) => {
+			const request = Https.request(options, (response) => {
 				const finalize = new Stream.PassThrough();
 				let objectString = "";
 				finalize.on("data", (chunk) => { objectString += chunk.toString(); });
@@ -56,9 +57,12 @@ export class HttpRequest {
 					case "gzip": response.pipe(Zlib.createGunzip()).pipe(finalize); break;
 					default: response.pipe(finalize);
 				}
-			})
-			.on("error", reject)
-			.end();
+			});
+			request.on("error", reject);
+
+			if (body !== undefined)
+				request.write(body);
+			request.end();
 		});
 	}
 	getBidirectionalIterator(current) {
@@ -93,23 +97,36 @@ export class HttpRequest {
 		if (query)
 			for (const item in query)
 				url.searchParams.append(item, query[item]);
+		url.searchParams.sort();
+		const cacheItem = HttpCache.get(url.href);
+
+		if (!cacheItem.isExpired)
+			return cacheItem.data;
+		else if (cacheItem.hasConditionalRequest)
+			Object.assign(headers, (typeof cacheItem.etag === "string") ? { ["if-none-match"]: cacheItem.etag } : { ["if-modified-since"]: cacheItem.lastModified });
+		console.log({ url: url.href });
 		const response = await this.generateHttpsRequest(Object.assign({ agent: this.agent, headers, method }, this.constructor.urlToOptions(url)));
 
 		if (response.status === 404)
 			throw new BotError(`No results found for ${query}.  (404)`);
-		else if (response.status !== 200 && response.status !== 304)
+		else if ([304, 412].includes(response.status) && cacheItem.hasConditionalRequest)
+			return cacheItem.data;
+		else if (response.status !== 200)
 			throw new BotError(`HTTPS request failed.  Status code: ${response.status.toString()}`);
-		return JSON.parse(response.data);
+		const data = JSON.parse(response.data);
+		HttpCache.set(url.href, { data, headers: response.headers });
+		return data;
 	}
 }
 HttpRequest.headers = {
+	accept: { accept: "application/json" },
 	encoding: { ["accept-encoding"]: ACCEPT_ENCODING },
 	keepAlive: { connection: "keep-alive" },
 	async getDefault() {
 		if ("default" in this)
 			return this.default;
 		const version = await util.readFile(APP_VERSION_FILE);
-		return this.default = Object.assign({ ["user-agent"]: DEFAULT_USER_AGENT.replace(/NOT_YET_CALCULATED/g, version.trim()) }, this.encoding);
+		return this.default = Object.assign({ ["user-agent"]: DEFAULT_USER_AGENT.replace(/NOT_YET_CALCULATED/g, version.trim()) }, this.encoding, this.accept);
 	}
 };
 HttpRequest.prototype.agent = undefined;

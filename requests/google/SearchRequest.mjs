@@ -23,6 +23,7 @@ export class SearchRequest extends GoogleRequest {
 		const current = function() {
 			const result = request.results[this.index];
 			const value = {
+				color: undefined,
 				description: result.snippet.replace(/\n/g, ""),
 				footer: { iconURL: request.constructor.FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
 				thumbnail: request.constructor.getThumbnailUrl(result),
@@ -36,5 +37,5 @@ export class SearchRequest extends GoogleRequest {
 		};
 		return super.getBidirectionalIterator(current);
 	}
-	async query(queryString, isNsfw = false) { return super.query({ q: queryString }, isNsfw); }
+	async query(queryString, isNsfw = false) { return super.query({ fields: SEARCH_FIELDS, q: queryString }, isNsfw); }
 }

@@ -18,5 +18,5 @@ export class ImageRequest extends GoogleRequest {
 		};
 		return super.getBidirectionalIterator(current);
 	}
-	async query(queryString, isNsfw = false) { return super.query({ q: queryString, searchType: "image" }, isNsfw); }
+	async query(queryString, isNsfw = false) { return super.query({ fields: SEARCH_FIELDS, q: queryString, searchType: "image" }, isNsfw); }
 }

@@ -88,10 +88,17 @@ Bot.prototype.client = undefined;
 Bot.prototype.commands = {
 	async ["4"](...args) { return this.commands["4chan"].bind(this)(...args); },
 	async ["4chan"]({ author, channel }, args) { return this.sendApiRequest(Requests.FourChan, author, channel, args); },
-	async db({ author, channel }, args) {
+	async db(...args) { return this.commands.derpibooru.bind(this)(...args); },
+	async derpibooru({ author, channel }, args) {
 		if (!args)
 			return;
 		return this.sendApiRequest(Requests.Derpibooru, author, channel, args);
+	},
+	async ff(...args) { return this.commands.fimfiction.bind(this)(...args); },
+	async fimfiction({ author, channel }, args) {
+		if (!args)
+			return;
+		return this.sendApiRequest(Requests.Fimfiction, author, channel, args);
 	},
 	async g(...args) { return this.commands.google.bind(this)(...args); },
 	async google({ author, channel }, args) {
