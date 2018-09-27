@@ -13,6 +13,8 @@ export function arrayShuffle(array) {
 	return array;
 }
 
+export function formatBbCode(string) { return (typeof string === "string") ? string.replace(/\[[^\[\]]+\]/g, "").trim() : ""; }
+
 export function formatTimestamp(number) {
 	const timestamp = new Date(number);
 	const duration = [timestamp.getUTCDate() - 1, timestamp.getUTCHours(), timestamp.getUTCMinutes(), timestamp.getUTCSeconds() + timestamp.getUTCMilliseconds() / 1000];
@@ -39,5 +41,5 @@ export function toString(value) {
 
 export async function writeFile(file, data) { return fsWriteFile(Path.join(process.cwd(), file), data); }
 
-const util = { arrayShuffle, formatTimestamp, readFile, toString, writeFile };
+const util = { arrayShuffle, formatBbCode, formatTimestamp, readFile, toString, writeFile };
 export default util;

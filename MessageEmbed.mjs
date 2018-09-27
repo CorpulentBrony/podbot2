@@ -15,13 +15,20 @@ export class MessageEmbed {
 		if (options.channel)
 			this.channel = options.channel;
 	}
+	get embedVideoMessage() {
+		const description = (typeof this.embed.description === "string") ? `${this.embed.description}\r\n` : "";
+		const footer = (this.embed.footer instanceof this.constructor.Embed.Footer && typeof this.embed.footer.text === "string") ? this.embed.footer.text : "";
+		const title = (typeof this.embed.title === "string") ? `**${this.embed.title}**\r\n` : "";
+		const url = `${this.embed.video.url}\r\n`;
+		return `${title}${description}${url}${footer}`;
+	}
 	get isEmbedVideo() { return this.embed.video && typeof this.embed.video.url === "string"; }
 	async edit(options) {
 		const message = await this.message;
 		const embed = this.embed.assign(options);
 
 		if (this.isEmbedVideo)
-			return message.edit(embed.video.url);
+			return message.edit(this.embedVideoMessage);
 		return message.edit(undefined, { embed: embed });
 	}
 	async removeReactions(reactsToDelete) {
@@ -38,7 +45,7 @@ export class MessageEmbed {
 	async send(channel = this.channel, author = this.embed.author, reacts) {
 		author = (typeof author === "object") ? { author: { icon_url: util.toString(author.avatarURL), name: util.toString(author.username) } } : {};
 		reacts = (typeof reacts !== "object") ? { default: false, values: [] } : { collect: reacts.collect, default: Boolean(reacts.default), values: Array.isArray(reacts.values) ? reacts.values : [] };
-		const args = this.isEmbedVideo ? [this.embed.video.url] : [undefined, { embed: Object.assign(this.embed, author) }];
+		const args = this.isEmbedVideo ? [this.embedVideoMessage] : [undefined, { embed: Object.assign(this.embed, author) }];
 		this.message = channel.send(...args).catch(console.error);
 
 		if (reacts.default || reacts.values.length > 0) {
@@ -112,7 +119,7 @@ MessageEmbed.Embed.Footer = class Footer {
 	}
 };
 MessageEmbed.Embed.Footer.parent = MessageEmbed.Embed;
-MessageEmbed.Embed.fieldLengths = { description: 2048, field: { name: 256, value: 1024 }, footer: { text: 2048 }, title: 256 };
+MessageEmbed.Embed.fieldLengths = { description: 768, field: { name: 256, value: 1024 }, footer: { text: 768 }, title: 256 };
 MessageEmbed.Embed.trim = function(string, fieldName, fieldParent = MessageEmbed.Embed.fieldLengths) {
 	[fieldName, string] = [util.toString(fieldName), util.toString(string)];
 

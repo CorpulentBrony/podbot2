@@ -1,7 +1,7 @@
 import { HttpRequest } from "/requests/HttpRequest";
 import { GoogleRequest } from "./GoogleRequest";
 
-const FILTERS = { safe: "strict", nsfw: "none" };
+const FILTERS = { safe: "none", nsfw: "none" }; // disabled safe search since YT content is mostly ok for SFW discord channels{ safe: "strict", nsfw: "none" };
 const MAX_RESULTS = 25;
 const RESULT_BASE_URL = "https://www.youtube.com";
 const SEARCH_PATH = "/youtube/v3/search"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
@@ -15,7 +15,7 @@ export class YouTubeRequest extends HttpRequest {
 			const result = request.results[this.index];
 			const url = new URL(WATCH_URL);
 			url.searchParams.set("v",  result.id.videoId);
-			return { done: false, value: { video: { url: url.toString() } } };
+			return { done: false, value: { footer: { text: `Video: ${(this.index + 1).toString()}/${request.results.length.toString()}` }, video: { url: url.toString() } } };
 		};
 		return super.getBidirectionalIterator(current);
 	}

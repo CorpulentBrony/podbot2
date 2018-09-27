@@ -1,4 +1,5 @@
 import { BotError } from "./BotError";
+import { ConsoleLogger } from "./ConsoleLogger";
 import * as Constants from "./Constants";
 import Discord from "discord.js";
 import { IgnoreList } from "./IgnoreList";
@@ -12,9 +13,12 @@ const BOT_NAME = "Twibotism";
 const BOT_SECRETS_FILE = ".bot_secrets.json";
 const BOT_TRIGGER = "!";
 const BOT_PRESENCE = { game: { name: "my brony cringe comp", type: 3, url: "https://iwtcits.com/" } };
+const COMMAND_ALIASES = { "4": "4chan", "db": "derpibooru", "ff": "fimfiction", "g": "google", "i": "image", "img": "image", "yt": "youtube" };
 
 export class Bot {
 	constructor() {
+		const logger = new ConsoleLogger();
+		this.log = logger.log;
 		this.client = new Discord.Client({
 			disabledEvents: [Discord.Constants.WSEvents.TYPING_START],
 			messageCacheLifetime: 30 * 60,
@@ -29,7 +33,10 @@ export class Bot {
 		this.client.on("reconnecting", this.log.bind(this, this.constructor.messages.reconnecting));
 		IgnoreList.client = this.client;
 	}
-	log(message) { console.log(message); }
+	// log(message) {
+	// 	const now = new Date();
+	// 	console.log(`[${now.toISOString()}] ${message}`);
+	// }
 	async login() {
 		const secrets = JSON.parse(await util.readFile(BOT_SECRETS_FILE));
 		this.client.login(secrets.token).catch(console.error);
@@ -54,7 +61,8 @@ export class Bot {
 			return this.commands[command].bind(this, message, args)().catch(console.error);
 	}
 	onReady() {
-		this.log(this.constructor.messages.reconnecting);
+		this.log(this.constructor.messages.ready);
+		this.log(`${BOT_NAME} currently a member of ${this.client.guilds.size} guilds: ${this.client.guilds.map((guild) => guild.name).join(", ")}`);
 		this.client.user.setPresence(BOT_PRESENCE);
 	}
 	async sendApiRequest(ApiRequest, author, channel, args) {
@@ -87,27 +95,23 @@ Bot.messages = {
 };
 Bot.prototype.client = undefined;
 Bot.prototype.commands = {
-	async ["4"](...args) { return this.commands["4chan"].bind(this)(...args); },
 	async ["4chan"]({ author, channel }, args) { return this.sendApiRequest(Requests.FourChan, author, channel, args); },
-	async db(...args) { return this.commands.derpibooru.bind(this)(...args); },
+	async ass({ author, channel }) { return this.commands.youtube.bind(this)({ author, channel }, "ySEbw4come0"); },
 	async derpibooru({ author, channel }, args) {
 		if (!args)
 			return;
 		return this.sendApiRequest(Requests.Derpibooru, author, channel, args);
 	},
-	async ff(...args) { return this.commands.fimfiction.bind(this)(...args); },
 	async fimfiction({ author, channel }, args) {
 		if (!args)
 			return;
 		return this.sendApiRequest(Requests.Fimfiction, author, channel, args);
 	},
-	async g(...args) { return this.commands.google.bind(this)(...args); },
 	async google({ author, channel }, args) {
 		if (!args)
 			return;
 		return this.sendApiRequest(Requests.Google.Search, author, channel, args);
 	},
-	async i(...args) { return this.commands.image.bind(this)(...args); },
 	async ignore({ author, channel, mentions }, args) {
 		try {
 			if (!BOT_ADMINS.includes(author.id))
@@ -135,7 +139,6 @@ Bot.prototype.commands = {
 			return;
 		return this.sendApiRequest(Requests.Google.Image, author, channel, args);
 	},
-	async img(...args) { return this.commands.image.bind(this)(...args); },
 	ping({ author, channel, createdTimestamp }) {
 		const description = `Response took: ${util.formatTimestamp(Date.now() - createdTimestamp)}; average socket ping: ${util.formatTimestamp(this.client.ping)}`;
 		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
@@ -147,7 +150,10 @@ Bot.prototype.commands = {
 		if (!args)
 			return;
 		return this.sendApiRequest(Requests.Google.YouTube, author, channel, args);
-	},
-	async yt(...args) { return this.commands.youtube.bind(this)(...args); }
+	}
 };
+
+for (const alias in COMMAND_ALIASES)
+	if (typeof alias === "string" && typeof COMMAND_ALIASES[alias] === "string" && !(alias in Bot.prototype.commands) && COMMAND_ALIASES[alias] in Bot.prototype.commands)
+		Bot.prototype.commands[alias] = Bot.prototype.commands[COMMAND_ALIASES[alias]];
 // console.log(Discord.Constants);
