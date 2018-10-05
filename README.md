@@ -2,9 +2,9 @@
 
 ## **_notices your bot_**
 
-## OwO what's this?
+### OwO what's this?
 
-`podbot2` is a completely re-written version of[`podbot`].  It is a [Discord] bot written in JavaScript to run on [Node.js] by leveraging the [discord.js](https://discord.js.org/) API.
+`podbot2` is a completely re-written version of[`podbot`].  It is a [Discord] bot written in JavaScript to run on [Node.js] by leveraging the [discord.js] API.
 
 ## Can I add it to my server?
 
@@ -34,7 +34,7 @@ These commands are separate and individual from anything else, with all the code
 * `ping`  
 **Source:** [`ping.mjs`](commands/ping.mjs)
 
-  Will show the current and average ping times to the bot's server. The current ping time is based on the timestamp value attached to the command's message and the server's timestamp. The average is from whatever magic the discord.js API uses.
+  Will show the current and average ping times to the bot's server. The current ping time is based on the timestamp value attached to the command's message and the server's timestamp. The average is from whatever magic the [discord.js] API uses.
 
 ### API Request Commands
 
@@ -44,29 +44,29 @@ These commands leverage implementations of the [`HttpRequest`](requests/HttpRequ
 <code>derpibooru *id*</code>  
 **Alias:** `db`
 
-  Searches [Derpibooru](https://www.derpibooru.org/) for the given search term (or image ID) and returns a randomized page from the search results with the results on that page randomized as well (so earch search will likely return different results in a different order).  Supports full search syntax from the Derpibooru site.  Must specify either a search phrase or an image ID.
+  Searches [Derpibooru] for the given search term (or image ID) and returns a randomized page from the search results with the results on that page randomized as well (so earch search will likely return different results in a different order).  Supports full search syntax from the Derpibooru site.  Must specify either a search phrase or an image ID.
 * <code>fimfiction *search*</code>  
 **Alias:** `ff`
 
-  Searches stories posted at [Fimfiction](https://www.fimfiction.net/) for the given search term.
+  Searches stories posted at [Fimfiction] for the given search term.
 * `fourchan`  
 <code>fourchan *search*</code>  
 <code>fourchan *id*</code>  
 **Alias:** `4chan`, `4`
 
-  Searches OP threads from the [/mlp/](https://www.4chan.org/mlp/) board (configurable) on [4chan](https://www.4chan.org/) for the given search term or thread ID.  If no argument is given, will just return a random thread from the /mlp/ board.  If a thread ID is given, then the returned results will include all posts within the thread.
+  Searches OP threads from the [/mlp/] board (configurable) on [4chan] for the given search term or thread ID.  If no argument is given, will just return a random thread from the /mlp/ board.  If a thread ID is given, then the returned results will include all posts within the thread.
 * <code>google *search*</code>  
 **Alias:** `g`, `search`
 
-  Searches [Google](https://www.google.com/) for the given search term and returns the ten most applicable answers.  Supports full Google search syntax.
+  Searches [Google] for the given search term and returns the ten most applicable answers.  Supports full search syntax.
 * <code>image *search*</code>  
 **Alias:** `img`, `i`
 
-  Searches [Google images](https://images.google.com/) for the given search term and returns the ten most applicable images.  Supports full Google search syntax.
+  Searches [Google images] for the given search term and returns the ten most applicable images.  Supports full search syntax.
 * <code>youtube *search*</code>  
 **Alias:** `yt`
 
-  Searches [YouTube](https://youtube.com) for the given search term and returns the most applicable videos, supports full YouTube search syntax.  Must specify a search phrase.
+  Searches [YouTube] for the given search term and returns the most applicable videos, supports full YouTube search syntax.  Must specify a search phrase.
 
 ### Extended API Request Commands
 
@@ -74,14 +74,14 @@ These commands extend one of the API request commands above and are often shortc
 
 * `ass`
 
-  Performs a YouTube search for the video with ID [`ySEbw4come0`](https://www.youtube.com/watch?v=ySEbw4come0).
+  Performs a [YouTube] search for the video with ID [`ySEbw4come0`](https://www.youtube.com/watch?v=ySEbw4come0).
 * `ntt`
 
-  Performs a search on /mlp/ for the term `nightly twilight` and returns the first thread.
+  Performs a search on [/mlp/] for the term `nightly twilight` and returns the first thread.
 
 * `plush`
 
-  Performs a search on /mlp/ for the term `plush` and returns the first thread.
+  Performs a search on [/mlp/] for the term `plush` and returns the first thread.
 
 ## What else might it do in the future?
 
@@ -89,8 +89,17 @@ So far I can't think of anything else.  What would you like to see?  Open an iss
 
 ## Who is best horse?
 
-[Twilight Sparkle](https://horse.best/) of course.
+[Twilight Sparkle] of course.
 
+[/mlp/]: https://www.4chan.org/mlp/
+[4chan]: https://www.4chan.org/
+[Derpibooru]: https://www.derpibooru.org/
 [Discord]: https://discordapp.com/
+[discord.js]: https://discord.js.org/
+[Fimfiction]: https://www.fimfiction.net/
+[Google]: https://www.google.com/
+[Google images]: https://images.google.com/
 [Node.js]: https://nodejs.org/
 [`podbot`]: https://github.com/CorpulentBrony/podbot
+[Twilight Sparkle]: https://horse.best/
+[YouTube]: https://youtube.com/
