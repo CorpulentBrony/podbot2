@@ -30,7 +30,7 @@ These commands are separate and individual from anything else, with all the code
 <code>ignore remove *user*</code>  
 **Source:** [`ignore.mjs`](commands/ignore.mjs)
 
-  This command can only be used by a bot admin (defined at the top of the [Bot.mjs](Bot.mjs) file).  If given with no arguments, will display a list of users currently on the ignore list.  If given with just a user mention, will add that user to the ignore list.  If the command begins with `remove` or `delete` followed by one or more user mentions, will remove those users from the ignore list.  The bot will simply ignore all users on the ignore list, including all commands and reactions.  You cannot ignore someone in the admin list.
+  This command can only be used by a bot admin (defined at the top of the [Bot.mjs](Bot.mjs) file).  If given with no arguments, will display a list of users currently on the ignore list.  If given with just a user mention, will add that user to the ignore list.  If the command begins with `remove` or `delete` followed by one or more user mentions, will remove those users from the ignore list.  The bot will simply ignore all users on the ignore list, including all commands and reactions.  You cannot ignore someone in the admin list.  
 * `ping`  
 **Source:** [`ping.mjs`](commands/ping.mjs)
 
@@ -44,25 +44,25 @@ These commands leverage implementations of the [`HttpRequest`](requests/HttpRequ
 <code>derpibooru *id*</code>  
 **Alias:** `db`
 
-  Searches [Derpibooru] for the given search term (or image ID) and returns a randomized page from the search results with the results on that page randomized as well (so earch search will likely return different results in a different order).  Supports full search syntax from the Derpibooru site.  Must specify either a search phrase or an image ID.
+  Searches [Derpibooru] for the given search term (or image ID) and returns a randomized page from the search results with the results on that page randomized as well (so earch search will likely return different results in a different order).  Supports full search syntax from the Derpibooru site.  Must specify either a search phrase or an image ID.  
 * <code>fimfiction *search*</code>  
 **Alias:** `ff`
 
-  Searches stories posted at [Fimfiction] for the given search term.
+  Searches stories posted at [Fimfiction] for the given search term.  
 * `fourchan`  
 <code>fourchan *search*</code>  
 <code>fourchan *id*</code>  
 **Alias:** `4chan`, `4`
 
-  Searches OP threads from the [/mlp/] board (configurable) on [4chan] for the given search term or thread ID.  If no argument is given, will just return a random thread from the /mlp/ board.  If a thread ID is given, then the returned results will include all posts within the thread.
+  Searches OP threads from the [/mlp/] board (configurable) on [4chan] for the given search term or thread ID.  If no argument is given, will just return a random thread from the /mlp/ board.  If a thread ID is given, then the returned results will include all posts within the thread.  
 * <code>google *search*</code>  
 **Alias:** `g`, `search`
 
-  Searches [Google] for the given search term and returns the ten most applicable answers.  Supports full search syntax.
+  Searches [Google] for the given search term and returns the ten most applicable answers.  Supports full search syntax.  
 * <code>image *search*</code>  
 **Alias:** `img`, `i`
 
-  Searches [Google images] for the given search term and returns the ten most applicable images.  Supports full search syntax.
+  Searches [Google images] for the given search term and returns the ten most applicable images.  Supports full search syntax.  
 * <code>youtube *search*</code>  
 **Alias:** `yt`
 
@@ -74,10 +74,10 @@ These commands extend one of the API request commands above and are often shortc
 
 * `ass`
 
-  Performs a [YouTube] search for the video with ID [`ySEbw4come0`](https://www.youtube.com/watch?v=ySEbw4come0).
+  Performs a [YouTube] search for the video with ID [`ySEbw4come0`](https://www.youtube.com/watch?v=ySEbw4come0).  
 * `ntt`
 
-  Performs a search on [/mlp/] for the term `nightly twilight` and returns the first thread.
+  Performs a search on [/mlp/] for the term `nightly twilight` and returns the first thread.  
 
 * `plush`
 
