@@ -3,6 +3,8 @@ import * as Path from "path";
 // sets the root dir for imports to be process.cwd()
 export function resolve(specifier, parentModuleUrl, defaultResolve) {
 	if (typeof parentModuleUrl === "string" && specifier.startsWith("/")) {
+		if (specifier.endsWith("/"))
+			specifier += "index";
 		const path = Path.parse(`${process.cwd()}${specifier}`);
 
 		if (path.ext === "")

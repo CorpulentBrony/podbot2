@@ -1,6 +1,5 @@
-import { BotError } from "./BotError";
+import * as Commands from "./commands/";
 import { ConsoleLogger } from "./ConsoleLogger";
-import * as Constants from "./Constants";
 import Discord from "discord.js";
 import { IgnoreList } from "./IgnoreList";
 import { MessageEmbed } from "./MessageEmbed";
@@ -8,12 +7,10 @@ import * as Requests from "./requests/";
 import util from "./util";
 
 // join link: https://discordapp.com/api/oauth2/authorize?client_id=479736033223901196&permissions=60488&scope=bot
-const BOT_ADMINS = ["81203047132307456" /* Corpulent Brony#1337 */];
 const BOT_NAME = "Twibotism";
 const BOT_SECRETS_FILE = ".bot_secrets.json";
 const BOT_TRIGGER = "!";
 const BOT_PRESENCE = { game: { name: "my brony cringe comp", type: 3, url: "https://iwtcits.com/" } };
-const COMMAND_ALIASES = { "4": "4chan", "db": "derpibooru", "ff": "fimfiction", "g": "google", "i": "image", "img": "image", "yt": "youtube" };
 
 export class Bot {
 	constructor() {
@@ -27,16 +24,12 @@ export class Bot {
 			presence: BOT_PRESENCE,
 			ws: { compress: true }
 		});
-		// this.client.on("debug", console.log);
 		this.client.on("message", this.onMessage.bind(this));
 		this.client.on("ready", this.onReady.bind(this));
 		this.client.on("reconnecting", this.log.bind(this, this.constructor.messages.reconnecting));
+		Object.values(Commands).forEach((Command) => Command.attach(this.commands));
 		IgnoreList.client = this.client;
 	}
-	// log(message) {
-	// 	const now = new Date();
-	// 	console.log(`[${now.toISOString()}] ${message}`);
-	// }
 	async login() {
 		const secrets = JSON.parse(await util.readFile(BOT_SECRETS_FILE));
 		this.client.login(secrets.token).catch(console.error);
@@ -65,28 +58,6 @@ export class Bot {
 		this.log(`${BOT_NAME} currently a member of ${this.client.guilds.size} guilds: ${this.client.guilds.map((guild) => guild.name).join(", ")}`);
 		this.client.user.setPresence(BOT_PRESENCE);
 	}
-	async sendApiRequest(ApiRequest, author, channel, args) {
-		try {
-			const request = new ApiRequest();
-			const resultIterator = await request.query(args, channel.nsfw);
-			const embed = new MessageEmbed(resultIterator.current().value);
-			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
-			const reactionCollector = await embed.send(channel, author, reacts);
-			reactionCollector.on("collect", (reaction) => {
-				switch (reaction.emoji.name) {
-					case Constants.ReactsDecoded.FIRST: return embed.edit(resultIterator.first().value);
-					case Constants.ReactsDecoded.LAST: return embed.edit(resultIterator.last().value);
-					case Constants.ReactsDecoded.PREV: return embed.edit(resultIterator.prev().value);
-					case Constants.ReactsDecoded.NEXT: return embed.edit(resultIterator.next().value);
-				}
-			});
-		} catch (err) {
-			if (err instanceof BotError)
-				err.sendEmbed(channel, author);
-			else
-				throw err;
-		}
-	}
 }
 
 Bot.messages = {
@@ -94,66 +65,4 @@ Bot.messages = {
 	reconnecting: `${BOT_NAME} connecting to server`
 };
 Bot.prototype.client = undefined;
-Bot.prototype.commands = {
-	async ["4chan"]({ author, channel }, args) { return this.sendApiRequest(Requests.FourChan, author, channel, args); },
-	async ass({ author, channel }) { return this.commands.youtube.bind(this)({ author, channel }, "ySEbw4come0"); },
-	async derpibooru({ author, channel }, args) {
-		if (!args)
-			return;
-		return this.sendApiRequest(Requests.Derpibooru, author, channel, args);
-	},
-	async fimfiction({ author, channel }, args) {
-		if (!args)
-			return;
-		return this.sendApiRequest(Requests.Fimfiction, author, channel, args);
-	},
-	async google({ author, channel }, args) {
-		if (!args)
-			return;
-		return this.sendApiRequest(Requests.Google.Search, author, channel, args);
-	},
-	async ignore({ author, channel, mentions }, args) {
-		try {
-			if (!BOT_ADMINS.includes(author.id))
-				throw new BotError("You do not have the necessary permissions to perform this action.");
-			const users = Array.from(mentions.users.values());
-
-			if (users.length > 0) {
-				const changeFunction = (args.startsWith("delete") || args.startsWith("remove")) ? IgnoreList.delete : IgnoreList.add;
-				users.forEach((user) => {
-					if (!BOT_ADMINS.includes(user.id))
-						changeFunction(user.id);
-				});
-			}
-			const embed = new MessageEmbed({ footer: Constants.Emotes.NO_ENTRY, description: `Current ignore list: ${await IgnoreList.toString()}`, title: "Ignore List" });
-			return embed.send(channel, author);
-		} catch (err) {
-			if (err instanceof BotError)
-				err.sendEmbed(channel, author);
-			else
-				throw err;
-		}
-	},
-	async image({ author, channel }, args) {
-		if (!args)
-			return;
-		return this.sendApiRequest(Requests.Google.Image, author, channel, args);
-	},
-	ping({ author, channel, createdTimestamp }) {
-		const description = `Response took: ${util.formatTimestamp(Date.now() - createdTimestamp)}; average socket ping: ${util.formatTimestamp(this.client.ping)}`;
-		const embed = new MessageEmbed({ footer: Constants.Emotes.PING, description, title: "Pong!" });
-		return embed.send(channel, author);
-	},
-	async ntt({ author, channel }) { return this.commands["4chan"].bind(this)({ author, channel }, "nightly twilight"); },
-	async plush({ author, channel }) { return this.commands["4chan"].bind(this)({ author, channel }, "plush"); },
-	async youtube({ author, channel }, args) {
-		if (!args)
-			return;
-		return this.sendApiRequest(Requests.Google.YouTube, author, channel, args);
-	}
-};
-
-for (const alias in COMMAND_ALIASES)
-	if (typeof alias === "string" && typeof COMMAND_ALIASES[alias] === "string" && !(alias in Bot.prototype.commands) && COMMAND_ALIASES[alias] in Bot.prototype.commands)
-		Bot.prototype.commands[alias] = Bot.prototype.commands[COMMAND_ALIASES[alias]];
-// console.log(Discord.Constants);
+Bot.prototype.commands = {};
