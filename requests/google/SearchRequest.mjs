@@ -1,6 +1,5 @@
 import { GoogleRequest } from "./GoogleRequest";
-
-const SEARCH_FIELDS = "items(link,pagemap(cse_image/src,cse_thumbnail/src,metatags/theme-color,scraped/image_link),snippet,title),searchInformation(totalResults)";
+import SETTINGS from "/settings";
 
 export class SearchRequest extends GoogleRequest {
 	static getThumbnailUrl(result) {
@@ -37,5 +36,5 @@ export class SearchRequest extends GoogleRequest {
 		};
 		return super.getBidirectionalIterator(current);
 	}
-	async query(queryString, isNsfw = false) { return super.query({ fields: SEARCH_FIELDS, q: queryString }, isNsfw); }
+	async query(queryString, isNsfw = false) { return super.query({ fields: SETTINGS.REQUESTS.GOOGLE.SEARCH.SEARCH_FIELDS, q: queryString }, isNsfw); }
 }

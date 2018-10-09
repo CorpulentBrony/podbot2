@@ -1,11 +1,10 @@
 import { AbstractCommand } from "./AbstractCommand";
 import { BotError } from "/BotError";
-import * as Constants from "/Constants";
 import { MessageEmbed } from "/MessageEmbed";
+import SETTINGS from "/settings";
 
 export class AbstractApiRequestCommand extends AbstractCommand {
 	static async exec({ author, channel }, args) {
-		console.log({ ["this"]: this });
 		if (this.name.startsWith("Abstract"))
 			throw new Error("Attempted to execute an abstract API request command.");
 		else if (!this.areArgsOptional && !args)
@@ -14,14 +13,14 @@ export class AbstractApiRequestCommand extends AbstractCommand {
 			const request = new this.ApiRequest();
 			const resultIterator = await request.query(args, channel.nsfw);
 			const embed = new MessageEmbed(resultIterator.current().value);
-			const reacts = { collect: true, default: request.length > 1, values: [Constants.Reacts.DEL] };
+			const reacts = { collect: true, default: request.length > 1, values: [SETTINGS.EMOTES.REACTS.DEL] };
 			const reactionCollector = await embed.send(channel, author, reacts);
 			reactionCollector.on("collect", (reaction) => {
 				switch (reaction.emoji.name) {
-					case Constants.ReactsDecoded.FIRST: return embed.edit(resultIterator.first().value);
-					case Constants.ReactsDecoded.LAST: return embed.edit(resultIterator.last().value);
-					case Constants.ReactsDecoded.PREV: return embed.edit(resultIterator.prev().value);
-					case Constants.ReactsDecoded.NEXT: return embed.edit(resultIterator.next().value);
+					case SETTINGS.EMOTES.REACTS_DECODED.FIRST: return embed.edit(resultIterator.first().value);
+					case SETTINGS.EMOTES.REACTS_DECODED.LAST: return embed.edit(resultIterator.last().value);
+					case SETTINGS.EMOTES.REACTS_DECODED.PREV: return embed.edit(resultIterator.prev().value);
+					case SETTINGS.EMOTES.REACTS_DECODED.NEXT: return embed.edit(resultIterator.next().value);
 				}
 			});
 		} catch (err) {

@@ -1,23 +1,12 @@
-import * as Constants from "/Constants";
 import { HttpRequest } from "./HttpRequest";
 import { InternalCacheMixin } from "/InternalCacheMixin";
+import SETTINGS from "/settings";
 import util from "/util";
 
 // API documentation: https://www.fimfiction.net/developers/api/v2/docs/applications
-const BASE_URL = "https://www.fimfiction.net";
-const FAVICON_URL = "https://static.fimfiction.net/images/favicon.png";
-const SEARCH_FIELDS = { ["fields[story]"]: "author,color,cover_image,description,name,num_comments,num_dislikes,num_likes,num_words,tags,title", ["fields[story_tag]"]: "name", ["fields[user]"]: "name" };
-const SEARCH_PATH = "/api/v2/stories";
-const SECRETS_FILE = ".fimfiction_secrets.json";
-const STORY_BASE_URL = "https://www.fimfiction.net/story/";
 
 export class FimfictionRequest extends InternalCacheMixin(HttpRequest, { author: Map, tag: Map, tags: WeakMap }) {
-	static get secrets() {
-		delete this.secrets;
-		return Object.defineProperty(this, "secrets", { value: this.getSecrets() }).secrets;
-	}
-	static async getSecrets() { return JSON.parse(await util.readFile(SECRETS_FILE)); }
-	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
+	constructor() { super(new URL(SETTINGS.REQUESTS.FIMFICTION.API_PATH, SETTINGS.REQUESTS.FIMFICTION.URL)); }
 	getAuthor(id) { return this.getIncludedById(id, "author", "user"); }
 	getBidirectionalIterator() {
 		const request = this;
@@ -33,12 +22,12 @@ export class FimfictionRequest extends InternalCacheMixin(HttpRequest, { author:
 				description: util.formatBbCode(story.attributes.description),
 				fields: {
 					name: "--",
-					value: `${numWords}${Constants.Emotes.BAR_CHART} ${numLikes}${Constants.Emotes.UP} ${numDislikes}${Constants.Emotes.DOWN} ${numComments}${Constants.Emotes.COMMENT}`
+					value: `${numWords}${SETTINGS.EMOTES.ALL.BAR_CHART} ${numLikes}${SETTINGS.EMOTES.ALL.UP} ${numDislikes}${SETTINGS.EMOTES.ALL.DOWN} ${numComments}${SETTINGS.EMOTES.ALL.COMMENT}`
 				},
-				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\r\n${request.getTags(story.relationships.tags.data)}` },
+				footer: { iconURL: SETTINGS.REQUESTS.FIMFICTION.FAVICON, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\r\n${request.getTags(story.relationships.tags.data)}` },
 				thumbnail: ("cover_image" in story.attributes) ? { url: story.attributes.cover_image.full } : undefined,
 				title: `${story.attributes.title} written by ${author.attributes.name}`.trim(),
-				url: `${STORY_BASE_URL}${story.id}`
+				url: `${SETTINGS.REQUESTS.FIMFICTION.STORY_URL}${story.id}`
 			};
 
 			if ("color" in story.attributes) {
@@ -54,7 +43,7 @@ export class FimfictionRequest extends InternalCacheMixin(HttpRequest, { author:
 	getIncludedById(id, cachedType, includedType) { return this.getFromCache(cachedType, id, () => this.included.filter((included) => included.id === id && included.type === includedType)[0]); }
 	getTags(tagArray) { return this.getFromCache("tags", tagArray, () => tagArray.map(({ id, type }) => this.getIncludedById(id, "tag", type)).map(({ attributes }) => attributes.name).join(", ")); }
 	async query(queryString, isNsfw = false) {
-		const query = Object.assign({ ["page[size]"]: 20, query: queryString.replace(/best pony/g, "Twilight Sparkle") }, SEARCH_FIELDS);
+		const query = Object.assign({ ["page[size]"]: 20, query: queryString.replace(/best pony/g, "Twilight Sparkle") }, SETTINGS.REQUESTS.FIMFICTION.SEARCH_FIELDS);
 		let response = await super.query("GET", query);
 
 		if (response.meta.num_stories === 0)
@@ -70,8 +59,7 @@ FimfictionRequest.headers = Object.assign({}, HttpRequest.headers, {
 	async getDefault() {
 		if ("default" in this)
 			return this.default;
-		const [result, secrets] = await Promise.all([HttpRequest.headers.getDefault(), FimfictionRequest.secrets]);
-		return this.default = Object.assign({ authorization: `Bearer ${secrets.token}` }, result, this.accept);
+		return this.default = Object.assign({ authorization: `Bearer ${SETTINGS.REQUESTS.FIMFICTION.TOKEN}` }, await HttpRequest.headers.getDefault(), this.accept);
 	}
 });
 FimfictionRequest.prototype.included = [];

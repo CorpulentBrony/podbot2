@@ -2,19 +2,13 @@ import { BotError } from "/BotError";
 import { HttpCache } from "./HttpCache";
 import * as Https from "https";
 import Iltorb from "iltorb";
+import SETTINGS from "/settings";
 import * as Stream from "stream";
 import util from "/util";
 import * as Zlib from "zlib";
 
-// should be "deflate", "gzip", "deflate, gzip", or "identity"; this is sent as accept-encoding with http request
-const ACCEPT_ENCODING = "br;q=1.0, deflate;q=0.4, gzip;q=0.7";
-const APP_NAME = "podbot2";
-const APP_URL = "https://iwtcits.com";
-// file that stores a version reference for the app (must be given in relation to app location and should be utf8 encoded)
-const APP_VERSION_FILE = ".git/refs/heads/master";
 // this is sent as user-agent with the http request.  the text "NOT_YET_CALCULATED" will be replaced with the app version
-const DEFAULT_USER_AGENT = `${APP_NAME}/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; ${ACCEPT_ENCODING}; +${APP_URL}) node/${process.version}`;
-const FAVICON_URL = "https://iwtcits.com/twibedroom.png";
+const DEFAULT_USER_AGENT = `${SETTINGS.REQUESTS.APP.NAME}/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; ${SETTINGS.REQUESTS.ACCEPT_ENCODING}; +${SETTINGS.REQUESTS.APP.URL}) node/${process.version}`;
 
 export class HttpRequest {
 	// recreating this function here as the Node.js implementation appears to be broken for some reason
@@ -120,12 +114,12 @@ export class HttpRequest {
 }
 HttpRequest.headers = {
 	accept: { accept: "application/json" },
-	encoding: { ["accept-encoding"]: ACCEPT_ENCODING },
+	encoding: { ["accept-encoding"]: SETTINGS.REQUESTS.ACCEPT_ENCODING },
 	keepAlive: { connection: "keep-alive" },
 	async getDefault() {
 		if ("default" in this)
 			return this.default;
-		const version = await util.readFile(APP_VERSION_FILE);
+		const version = await util.readFile(SETTINGS.REQUESTS.APP.VERSION_FILE);
 		return this.default = Object.assign({ ["user-agent"]: DEFAULT_USER_AGENT.replace(/NOT_YET_CALCULATED/g, version.trim()) }, this.encoding, this.accept);
 	}
 };

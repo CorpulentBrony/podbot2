@@ -1,12 +1,7 @@
-import * as Constants from "./Constants";
 import Discord from "./node_modules/discord.js/src/index.js";
 import { IgnoreList } from "./IgnoreList";
+import SETTINGS from "./settings";
 import util from "./util";
-
-const DEFAULT_EMBED_COLOR = 0x673888;
-const DEFAULT_REACTS = { del: Constants.Reacts.DEL, first: Constants.Reacts.FIRST, last: Constants.Reacts.LAST, next: Constants.Reacts.NEXT, prev: Constants.Reacts.PREV, stop: Constants.Reacts.STOP };
-const DEFAULT_REACTS_COLLECT_OPTIONS = { time: 300000 };
-const DEFAULT_REACTS_DISPLAY_ORDER = ["first", "prev", "next", "last", "stop", "del"];
 
 export class MessageEmbed {
 	constructor(options) {
@@ -60,13 +55,13 @@ export class MessageEmbed {
 					reacts.collect = new Boolean(reacts.collect);
 
 				if (!reacts.collect.options)
-					reacts.collect.options = DEFAULT_REACTS_COLLECT_OPTIONS;
+					reacts.collect.options = SETTINGS.MESSAGE_EMBED.COLLECT_OPTIONS;
 				const reactsToSendDecoded = reactsToSend.map(decodeURI);
 				const reactionCollector = this.message.createReactionCollector((reaction, user) => !user.bot && !IgnoreList.has(user.id) && reactsToSendDecoded.includes(reaction.emoji.name), reacts.collect.options);
 				reactionCollector.on("collect", (reaction) => {
 					switch (reaction.emoji.name) {
-						case Constants.Reacts.STOP: reactionCollector.stop(); break;
-						case Constants.Reacts.DEL: reaction.message.delete().catch(console.error);
+						case SETTINGS.EMOTES.REACTS.STOP: reactionCollector.stop(); break;
+						case SETTINGS.EMOTES.REACTS.DEL: reaction.message.delete().catch(console.error);
 					}
 				});
 				reactionCollector.on("end", () => this.removeReactions(reactsToSendDecoded).catch(console.error));
@@ -76,14 +71,14 @@ export class MessageEmbed {
 		return { message: this.message };
 	}
 }
-MessageEmbed.DEFAULT_REACTS = DEFAULT_REACTS_DISPLAY_ORDER.map((reactName) => DEFAULT_REACTS[reactName]);
+MessageEmbed.DEFAULT_REACTS = SETTINGS.MESSAGE_EMBED.DISPLAY_ORDER.map((reactName) => SETTINGS.MESSAGE_EMBED.REACTS[reactName]);
 MessageEmbed.Embed = class Embed {
 	constructor(options) {
 		this.assign(options);
 	}
 	assign(options) {
 		if (typeof options.color !== "number")
-			options.color = DEFAULT_EMBED_COLOR;
+			options.color = SETTINGS.MESSAGE_EMBED.COLOR;
 
 		for (const optionKey in options)
 			switch (optionKey) {

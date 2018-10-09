@@ -1,0 +1,116 @@
+/*
+This file should be kept secret and safe from other processes since it does contain sensitive data.
+If you are setting up a new bot, you will definitely need to modify the lines marked below marked as required.
+You will also want to review the other settings, as you may want to change them.
+NOTE: Changing your bot name requires a change in the Discord API.  The name as defined here is mostly used for logging and status messages.
+*/
+const SETTINGS = {
+	BOT: {
+		ADMINS: ["81203047132307456" /* Corpulent Brony#1337 */],
+		ID: "INPUT YOUR APPLICATION ID HERE",
+		NAME: "Twibotism",
+		PRESENCE: { game: { name: "my brony cringe comp", type: 3, url: "https://iwtcits.com/" } },
+		SECRET: "INPUT YOUR APPLICATION SECRET HERE",
+		TOKEN: "INPUT YOUR APPLICATION TOKEN HERE",
+		TRIGGER: "!"
+	},
+	COMMANDS: {
+		ALIASES: {
+			DERPIBOORU: ["db"],
+			FIMFICTION: ["ff"],
+			FOURCHAN: ["4chan", "4"],
+			GOOGLE: ["g", "search"],
+			IGNORE: ["block"],
+			IMAGE: ["i", "im", "img"],
+			YOUTUBE: ["yt"]
+		}
+	},
+	EMOTES: {
+		ALL: undefined, // defined below
+		REACTS: { DEL: "🗑", FIRST: "%E2%8F%AE" /* ⏮ */, LAST: "%E2%8F%AD" /* ⏭ */, NEXT: "⏩", PREV: "⏪", STOP: "⏹" },
+		REACTS_DECODED: undefined // defined below
+	},
+	ERROR: {
+		FOOTER: undefined, // defined below
+		IMAGE: "https://mlp.one/404.png",
+		TITLE: "oopsie woopsie"
+	},
+	HTTP_CACHE: {
+		GARBAGE_COLLECTION_INTERVAL_SECONDS: 60
+	},
+	IGNORE_LIST: {
+		FILE: ".ignore_list.json"
+	},
+	MESSAGE_EMBED: {
+		COLLECT_OPTIONS: { time: 300000 },
+		COLOR: 0x673888,
+		DISPLAY_ORDER: ["first", "prev", "next", "last", "stop", "del"],
+		REACTS: undefined // defined below
+	},
+	REQUESTS: {
+		ACCEPT_ENCODING: "br;q=1.0, deflate;q=0.4, gzip;q=0.7",
+		APP: {
+			NAME: "podbot2",
+			URL: "https://iwtcits.com/",
+			// file that stores a version reference for the app (must be given in relation to app location and should be utf8 encoded)
+			VERSION_FILE: ".git/refs/heads/master"
+		},
+		DERPIBOORU: {
+			API_PATH: "/search.json",
+			FAVICON: "https://derpicdn.net/img/2017/6/14/1461521/thumb.png",
+			FILTERS: { safe: 100073, nsfw: 56027 },
+			URL: "https://derpibooru.org"
+		},
+		FIMFICTION: {
+			API_PATH: "/api/v2/stories",
+			FAVICON: "https://static.fimfiction.net/images/favicon.png",
+			ID: "INPUT YOUR APPLICATION ID HERE",
+			SEARCH_FIELDS: { ["fields[story]"]: "author,color,cover_image,description,name,num_comments,num_dislikes,num_likes,num_words,tags,title", ["fields[story_tag]"]: "name", ["fields[user]"]: "name" },
+			SECRET: "INPUT YOUR APPLICATION SECRET HERE",
+			STORY_URL: "https://www.fimfiction.net/story/",
+			TOKEN: "INPUT YOUR APPLICATION TOKEN HERE",
+			URL: "https://www.fimfiction.net"
+		},
+		FOURCHAN: {
+			API_PATH: "catalog.json",
+			DEFAULT_BOARD: "mlp",
+			FAVICON: "https://s.4cdn.org/image/apple-touch-icon-iphone-retina.png",
+			IMAGE_URL: "https://i.4cdn.org",
+			LINK_URL: "https://boards.4chan.org",
+			URL: "https://a.4cdn.org"
+		},
+		GOOGLE: {
+			API_KEY: "INPUT YOUR APPLICATION API KEY HERE",
+			API_PATH: "/customsearch/v1", // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
+			FAVICON: "https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png",
+			FILTERS: { safe: "active", nsfw: "off" },
+			IMAGE: {
+				SEARCH_FIELDS: "items(image/contextLink,link,snippet,title),searchInformation(totalResults)"
+			},
+			LANGUAGE: "lang_en", // https://developers.google.com/custom-search/docs/xml_results_appendices#languageCollections
+			SEARCH: {
+				SEARCH_FIELDS: "items(link,pagemap(cse_image/src,cse_thumbnail/src,metatags/theme-color,scraped/image_link),snippet,title),searchInformation(totalResults)"
+			},
+			SEARCH_ENGINE_ID: "INPUT YOUR APPLICATION SEARCH ENGINE ID HERE",
+			URL: "https://www.googleapis.com",
+			YOUTUBE: {
+				API_PATH: "/youtube/v3/search",
+				FILTERS: { safe: "none", nsfw: "none" },
+				MAX_RESULTS: 25,
+				WATCH_URL: new URL("https://www.youtube.com/watch")
+			}
+		}
+	}
+};
+SETTINGS.EMOTES.REACTS_DECODED = Object.entries(SETTINGS.EMOTES.REACTS).reduce((reactsDecoded, [reactName, reactEncoded]) => Object.assign(reactsDecoded, { [reactName]: decodeURI(reactEncoded) }), {});
+SETTINGS.EMOTES.ALL = Object.assign({ BAR_CHART: "📊", COMMENT: "💬", DOWN: "⬇", ERROR: "⚠", IMAGE: "🖼", NO_ENTRY: "⛔", PING: "🏓", STAR: "⭐", UP: "⬆" }, SETTINGS.EMOTES.REACTS_DECODED);
+SETTINGS.ERROR.FOOTER = SETTINGS.EMOTES.ALL.ERROR;
+SETTINGS.MESSAGE_EMBED.REACTS = {
+	del: SETTINGS.EMOTES.REACTS.DEL,
+	first: SETTINGS.EMOTES.REACTS.FIRST,
+	last: SETTINGS.EMOTES.REACTS.LAST,
+	next: SETTINGS.EMOTES.REACTS.NEXT,
+	prev: SETTINGS.EMOTES.REACTS.PREV,
+	stop: SETTINGS.EMOTES.REACTS.STOP
+};
+export default SETTINGS;

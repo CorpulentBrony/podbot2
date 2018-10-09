@@ -1,23 +1,15 @@
 import { HttpRequest } from "/requests/HttpRequest";
-import util from "/util";
-
-const BASE_URL = "https://www.googleapis.com";
-const FAVICON_URL = "https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png";
-const FILTERS = { safe: "active", nsfw: "off" };
-const SEARCH_LANGUAGE = "lang_en"; // https://developers.google.com/custom-search/docs/xml_results_appendices#languageCollections
-const SEARCH_PATH = "/customsearch/v1"; // https://developers.google.com/custom-search/json-api/v1/reference/cse/list
-const SECRETS_FILE = ".google_secrets.json";
+import SETTINGS from "/settings";
 
 export class GoogleRequest extends HttpRequest {
-	static get secrets() {
-		delete this.secrets;
-		return Object.defineProperty(this, "secrets", { value: this.getSecrets() }).secrets;
-	}
-	static async getSecrets() { return JSON.parse(await util.readFile(SECRETS_FILE)); }
-	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
+	constructor() { super(new URL(SETTINGS.REQUESTS.GOOGLE.API_PATH, SETTINGS.REQUESTS.GOOGLE.URL)); }
 	async query(query, isNsfw) {
-		const secrets = await this.constructor.secrets;
-		Object.assign(query, { cx: secrets.searchEngineId, hl: SEARCH_LANGUAGE, key: secrets.apiKey, safe: isNsfw ? FILTERS.nsfw : FILTERS.safe });
+		Object.assign(query, {
+			cx: SETTINGS.REQUESTS.GOOGLE.SEARCH_ENGINE_ID,
+			hl: SETTINGS.REQUESTS.GOOGLE.LANGUAGE,
+			key: SETTINGS.REQUESTS.GOOGLE.API_KEY,
+			safe: isNsfw ? SETTINGS.REQUESTS.GOOGLE.FILTERS.nsfw : SETTINGS.REQUESTS.GOOGLE.FILTERS.safe
+		});
 		query.q = query.q.replace(/best pony/g, "twilight sparkle");
 		let response = await super.query("GET", query);
 
@@ -28,5 +20,5 @@ export class GoogleRequest extends HttpRequest {
 		return this.getBidirectionalIterator();
 	}
 }
-GoogleRequest.BASE_URL = BASE_URL;
-GoogleRequest.FAVICON_URL = FAVICON_URL;
+GoogleRequest.BASE_URL = SETTINGS.REQUESTS.GOOGLE.URL;
+GoogleRequest.FAVICON_URL = SETTINGS.REQUESTS.GOOGLE.FAVICON;

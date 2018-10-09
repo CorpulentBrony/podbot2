@@ -1,4 +1,4 @@
-const CACHE_GARBAGE_COLLECTION_INTERVAL_SECONDS = 60;
+import SETTINGS from "/settings";
 
 class HttpCache extends Map {
 	constructor() {
@@ -73,6 +73,6 @@ HttpCache.Item.prototype.lastModified = undefined;
 HttpCache.garbageItem = new HttpCache.Item();
 
 const httpCache = new HttpCache();
-setInterval(httpCache.collectGarbage, CACHE_GARBAGE_COLLECTION_INTERVAL_SECONDS * 1000);
+setInterval(httpCache.collectGarbage, SETTINGS.HTTP_CACHE.GARBAGE_COLLECTION_INTERVAL_SECONDS * 1000);
 
 export { httpCache as HttpCache };

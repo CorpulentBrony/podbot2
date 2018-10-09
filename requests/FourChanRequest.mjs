@@ -1,21 +1,14 @@
 import { HttpRequest } from "./HttpRequest";
 import { arrayShuffle } from "/util";
 import { BotError } from "/BotError";
-import * as Constants from "/Constants";
 import He from "he";
 import * as Path from "path";
-
-const BASE_API_URL = "https://a.4cdn.org";
-const BASE_IMAGE_URL = "https://i.4cdn.org";
-const BASE_LINK_URL = "https://boards.4chan.org";
-const DEFAULT_BOARD = "mlp";
-const FAVICON_URL = "https://s.4cdn.org/image/apple-touch-icon-iphone-retina.png";
-const SEARCH_PATH = "catalog.json";
+import SETTINGS from "/settings";
 
 export class FourChanRequest extends HttpRequest {
-	constructor(board = DEFAULT_BOARD) {
-		super(new URL(Path.resolve("/", board, SEARCH_PATH), BASE_API_URL));
-		[this.baseUrl, this.board] = [new URL(`${Path.resolve("/", board, "thread")}/`, BASE_LINK_URL), board];
+	constructor(board = SETTINGS.REQUESTS.FOURCHAN.DEFAULT_BOARD) {
+		super(new URL(Path.resolve("/", board, SETTINGS.REQUESTS.FOURCHAN.API_PATH), SETTINGS.REQUESTS.FOURCHAN.URL));
+		[this.baseUrl, this.board] = [new URL(`${Path.resolve("/", board, "thread")}/`, SETTINGS.REQUESTS.FOURCHAN.LINK_URL), board];
 	}
 	getBidirectionalIterator() {
 		const request = this;
@@ -24,12 +17,12 @@ export class FourChanRequest extends HttpRequest {
 			const threadImages = thread.images ? thread.images.toString() : "0";
 			const threadReplies = thread.replies ? thread.replies.toString() : "0";
 			const isSingleThread = request.isSingleThread && this.index > 0;
-			const threadDetail = isSingleThread ? "" : `${thread.no.toString()}\n${threadImages}${Constants.Emotes.IMAGE} ${threadReplies}${Constants.Emotes.COMMENT}\n`;
+			const threadDetail = isSingleThread ? "" : `${thread.no.toString()}\n${threadImages}${SETTINGS.EMOTES.ALL.IMAGE} ${threadReplies}${SETTINGS.EMOTES.ALL.COMMENT}\n`;
 			request.baseUrl.hash = isSingleThread ? `p${thread.no.toString()}` : "";
 			const value = {
 				description: `${threadDetail}${request.constructor.formatHtml(thread.com)}`,
-				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
-				image: thread.tim ? { url: BASE_IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) } : undefined,
+				footer: { iconURL: SETTINGS.REQUESTS.FOURCHAN.FAVICON, text: `${(this.index + 1).toString()}/${request.results.length.toString()}` },
+				image: thread.tim ? { url: SETTINGS.REQUESTS.FOURCHAN.IMAGE_URL + Path.resolve("/", request.board, `${thread.tim}${thread.ext}`) } : undefined,
 				title: `${thread.sub ? thread.sub : "Thread"} posted by ${thread.name}`,
 				url: request.baseUrl.toString()
 			};
@@ -43,7 +36,7 @@ export class FourChanRequest extends HttpRequest {
 		let results = [];
 
 		if (queryStringIsNumeric)
-			[this.baseUrl.pathname, this.isSingleThread, this.url] = [`${this.baseUrl.pathname}${threadNumber}`, true, new URL(Path.resolve("/", this.board, "thread", `${threadNumber}.json`), BASE_API_URL)];
+			[this.baseUrl.pathname, this.isSingleThread, this.url] = [`${this.baseUrl.pathname}${threadNumber}`, true, new URL(Path.resolve("/", this.board, "thread", `${threadNumber}.json`), SETTINGS.REQUESTS.FOURCHAN.URL)];
 		const response = await super.query();
 
 		if (!queryStringIsNumeric) {
@@ -69,6 +62,6 @@ export class FourChanRequest extends HttpRequest {
 	}
 }
 FourChanRequest.formatHtml = function(html) { return (typeof html === "string") ? He.decode(html.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "")) : ""; };
-FourChanRequest.prototype.baseUrl = BASE_API_URL;
-FourChanRequest.prototype.board = DEFAULT_BOARD;
+FourChanRequest.prototype.baseUrl = SETTINGS.REQUESTS.FOURCHAN.URL;
+FourChanRequest.prototype.board = SETTINGS.REQUESTS.FOURCHAN.DEFAULT_BOARD;
 FourChanRequest.prototype.isSingleThread = false;

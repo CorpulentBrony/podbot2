@@ -1,6 +1,5 @@
 import { GoogleRequest } from "./GoogleRequest";
-
-const SEARCH_FIELDS = "items(image/contextLink,link,snippet,title),searchInformation(totalResults)";
+import SETTINGS from "/settings";
 
 export class ImageRequest extends GoogleRequest {
 	getBidirectionalIterator() {
@@ -18,5 +17,5 @@ export class ImageRequest extends GoogleRequest {
 		};
 		return super.getBidirectionalIterator(current);
 	}
-	async query(queryString, isNsfw = false) { return super.query({ fields: SEARCH_FIELDS, q: queryString, searchType: "image" }, isNsfw); }
+	async query(queryString, isNsfw = false) { return super.query({ fields: SETTINGS.REQUESTS.GOOGLE.IMAGE.SEARCH_FIELDS, q: queryString, searchType: "image" }, isNsfw); }
 }

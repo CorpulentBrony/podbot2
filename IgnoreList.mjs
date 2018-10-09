@@ -1,3 +1,4 @@
+import SETTINGS from "./settings";
 import util from "./util";
 
 const IGNORE_LIST_FILE = ".ignore_list.json";
@@ -28,12 +29,12 @@ class IgnoreList extends Map {
 	}
 	async load() {
 		if (!this.isLoaded)
-			for (const id of JSON.parse(await util.readFile(IGNORE_LIST_FILE)))
+			for (const id of JSON.parse(await util.readFile(SETTINGS.IGNORE_LIST.FILE)))
 				super.set(id, undefined);
 		this.isLoaded = true;
 		return this;
 	}
-	onValueChange() { util.writeFile(IGNORE_LIST_FILE, JSON.stringify(this)).catch(console.error); }
+	onValueChange() { util.writeFile(SETTINGS.IGNORE_LIST.FILE, JSON.stringify(this)).catch(console.error); }
 	set() { throw new Error("set method not implemented for IgnoreList"); }
 	toJSON() { return Array.from(super.keys()); }
 	async toString() {

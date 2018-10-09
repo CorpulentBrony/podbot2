@@ -1,14 +1,9 @@
 import { HttpRequest } from "./HttpRequest";
 import { arrayShuffle } from "/util";
-import * as Constants from "/Constants";
-
-const BASE_URL = "https://derpibooru.org";
-const FAVICON_URL = "https://derpicdn.net/img/2017/6/14/1461521/thumb.png";
-const FILTERS = { safe: 100073, nsfw: 56027 };
-const SEARCH_PATH = "/search.json";
+import SETTINGS from "/settings";
 
 export class DerpibooruRequest extends HttpRequest {
-	constructor() { super(new URL(SEARCH_PATH, BASE_URL)); }
+	constructor() { super(new URL(SETTINGS.REQUESTS.DERPIBOORU.API_PATH, SETTINGS.REQUESTS.DERPIBOORU.URL)); }
 	getBidirectionalIterator() {
 		const request = this;
 		const current = function() {
@@ -18,15 +13,15 @@ export class DerpibooruRequest extends HttpRequest {
 			const faves = image.faves.toLocaleString();
 			const imageFileName = (image.file_name === null) ? "" : image.file_name;
 			const imageUrl = new URL(`https:${image.image}`);
-			const pageUrl = new URL(`/${image.id.toString()}`, BASE_URL);
+			const pageUrl = new URL(`/${image.id.toString()}`, SETTINGS.REQUESTS.DERPIBOORU.URL);
 			const upvotes = image.upvotes.toLocaleString();
 			const value = {
 				description: image.description,
 				fields: {
 					name: "--",
-					value: `${faves}${Constants.Emotes.STAR} ${upvotes}${Constants.Emotes.UP} ${downvotes}${Constants.Emotes.DOWN} ${commentCount}${Constants.Emotes.COMMENT}`
+					value: `${faves}${SETTINGS.EMOTES.ALL.STAR} ${upvotes}${SETTINGS.EMOTES.ALL.UP} ${downvotes}${SETTINGS.EMOTES.ALL.DOWN} ${commentCount}${SETTINGS.EMOTES.ALL.COMMENT}`
 				},
-				footer: { iconURL: FAVICON_URL, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
+				footer: { iconURL: SETTINGS.REQUESTS.DERPIBOORU.FAVICON, text: `${(this.index + 1).toString()}/${request.results.length.toString()}\n${image.tags}` },
 				image: { url: imageUrl.toString() },
 				title: `${imageFileName} uploaded by ${image.uploader}`.trim(),
 				url: pageUrl.toString()
@@ -37,7 +32,7 @@ export class DerpibooruRequest extends HttpRequest {
 	}
 	async query(queryString, isNsfw = false) {
 		const query = {
-			filter_id: isNsfw ? FILTERS.nsfw : FILTERS.safe,
+			filter_id: isNsfw ? SETTINGS.REQUESTS.DERPIBOORU.FILTERS.nsfw : SETTINGS.REQUESTS.DERPIBOORU.FILTERS.safe,
 			q: (typeof queryString === "number" || Number.parseInt(queryString).toString() === queryString) ? `id:${Number.parseInt(queryString).toString()}` : queryString.replace(/best pony/g, "(ts,solo)")
 		};
 		let images;
